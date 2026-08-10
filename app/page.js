@@ -31,8 +31,8 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
   });
 
   return (
-    <div className="ansi-flowchart-wrapper flex flex-col items-center gap-2 p-4 w-full max-w-4xl mx-auto">
-      <div className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-2 text-center flex items-center justify-center gap-2">
+    <div className="ansi-flowchart-wrapper flex flex-col items-center gap-2 p-2 sm:p-4 w-full max-w-4xl mx-auto overflow-hidden">
+      <div className="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider mb-2 text-center flex items-center justify-center gap-2">
         <i className="fa-solid fa-diagram-project text-blue-600" /> Diagram Alur: {prodiObj.name}
       </div>
       {mainCards.map((c, idx) => {
@@ -52,11 +52,11 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
         );
 
         const annotationSlot = annotations.length > 0 ? (
-          <div className="flex flex-col gap-2 w-full sm:w-48 sm:max-w-xs pt-1">
+          <div className="flex flex-col gap-2 w-full sm:w-56 shrink-0 pt-1">
             {annotations.map((n, ni) => (
-              <div key={ni} className="fc-annotation-parallelogram bg-emerald-50 border-1.5 border-emerald-400 border-l-4 border-l-emerald-600 rounded p-2.5 text-xs text-emerald-900 font-semibold flex items-start gap-2 shadow-sm">
+              <div key={ni} className="fc-annotation-parallelogram bg-emerald-50 border border-emerald-400 border-l-4 border-l-emerald-600 rounded-lg p-2.5 text-xs text-emerald-950 font-semibold flex items-start gap-2 shadow-sm">
                 <i className="fa-solid fa-file-lines text-emerald-600 shrink-0 mt-0.5" />
-                <div><strong className="block text-emerald-950">{n.title}</strong>{n.note || n.description}</div>
+                <div className="break-words"><strong className="block text-emerald-950">{n.title}</strong>{n.note || n.description}</div>
               </div>
             ))}
           </div>
@@ -66,41 +66,41 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
           <div key={c.id} className="w-full flex flex-col items-center">
             <div className="fc-row-with-note flex flex-col sm:flex-row items-center sm:items-start gap-3 w-full max-w-2xl justify-center">
               {isTerminal ? (
-                <div className={`px-6 py-2.5 rounded-full font-bold text-sm tracking-wide flex items-center gap-2 shadow-md shrink-0 ${isFirst ? 'bg-slate-900 text-slate-5' : 'bg-emerald-800 text-emerald-50'}`}>
+                <div className={`px-5 py-2.5 rounded-full font-bold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 shadow-md shrink-0 text-center max-w-full ${isFirst ? 'bg-slate-900 text-slate-50' : 'bg-emerald-800 text-emerald-50'}`}>
                   <i className={`fa-solid ${isFirst ? 'fa-circle-play text-emerald-400' : 'fa-flag-checkered text-amber-300'}`} /> {labelContent}
                 </div>
               ) : isDecision ? (
                 <div className="flex flex-col items-center w-full max-w-md">
-                  <div className="w-36 h-36 bg-amber-50 border-2.5 border-amber-600 rotate-45 flex items-center justify-center my-2 shadow-sm shrink-0">
-                    <div className="-rotate-45 text-center text-xs font-extrabold text-amber-950 p-2 leading-tight max-w-[100px] break-words">
+                  <div className="w-32 h-32 sm:w-36 sm:h-36 bg-amber-50 border-2 border-amber-600 rotate-45 flex items-center justify-center my-3 shadow-sm shrink-0">
+                    <div className="-rotate-45 text-center text-[11px] sm:text-xs font-extrabold text-amber-950 p-2 leading-tight max-w-[100px] break-words">
                       {labelContent}
                     </div>
                   </div>
                   <div className="flex justify-between items-start w-full max-w-xs mt-1 gap-2">
-                    <div className="flex flex-col items-center flex-1">
+                    <div className="flex flex-col items-center flex-1 min-w-0">
                       <span className="text-[11px] font-extrabold text-red-700 block mb-1">TIDAK / Gagal</span>
                       <div className="flex flex-col items-center gap-1 w-full">
                         <i className="fa-solid fa-arrow-up text-red-600 text-base" />
-                        <div className="bg-red-50 border border-dashed border-red-300 rounded p-1.5 text-[11px] font-bold text-red-900 text-center leading-tight w-full">
+                        <div className="bg-red-50 border border-dashed border-red-300 rounded-lg p-1.5 text-[10px] sm:text-[11px] font-bold text-red-900 text-center leading-tight w-full break-words">
                           Kembali ke:<br />{prevCard ? prevCard.title : 'Proses Sebelumnya'}
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col items-center flex-1">
+                    <div className="flex flex-col items-center flex-1 min-w-0">
                       <span className="text-[11px] font-extrabold text-emerald-800 block mb-1">YA / Lulus</span>
                       <i className="fa-solid fa-arrow-down text-emerald-600 text-lg" />
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="w-full max-w-md bg-white border-2 border-slate-900 p-3.5 rounded-lg text-center shadow-sm">
-                  <div className="text-sm font-bold text-slate-900">{labelContent}</div>
+                <div className="w-full max-w-md bg-white border-2 border-slate-900 p-3.5 rounded-xl text-center shadow-sm">
+                  <div className="text-xs sm:text-sm font-bold text-slate-900">{labelContent}</div>
                   {c.description && <div className="text-xs text-slate-600 mt-1 font-medium">{c.description}</div>}
                 </div>
               )}
               {annotationSlot}
             </div>
-            {!isLast && <div className="text-slate-700 text-lg py-1"><i className="fa-solid fa-arrow-down" /></div>}
+            {!isLast && <div className="text-slate-700 text-base sm:text-lg py-1"><i className="fa-solid fa-arrow-down" /></div>}
           </div>
         );
       })}
@@ -124,7 +124,7 @@ function TimelineCards({ cards, prodiList, activeProdi }) {
           else term = card.te_term || card.title;
           if (!term) return null;
           return (
-            <span key={p.code} className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-md border font-bold ${activeProdi === p.code ? 'bg-blue-50 text-blue-700 border-blue-300 shadow-sm' : 'bg-slate-50 text-slate-500 border-slate-200 opacity-60'}`}>
+            <span key={p.code} className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] sm:text-xs rounded-lg border font-bold ${activeProdi === p.code ? 'bg-blue-50 text-blue-700 border-blue-300 shadow-sm' : 'bg-slate-50 text-slate-500 border-slate-200 opacity-60'}`}>
               <i className={`fa-solid ${p.icon || 'fa-graduation-cap'}`} style={{ color: p.color || '#2563eb' }} /> {p.code.toUpperCase()}: {term}
             </span>
           );
@@ -132,31 +132,31 @@ function TimelineCards({ cards, prodiList, activeProdi }) {
 
         return (
           <div key={card.id} className="flex flex-col items-center">
-            <div className={`w-full bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-all ${idx === 0 ? 'ring-2 ring-blue-500/20 border-blue-300' : ''}`}>
-              <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
-                <h3 className="font-bold text-slate-900 text-base">{card.title}</h3>
-                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-slate-100 text-slate-700 border border-slate-200">Tahap {card.step_number}</span>
+            <div className={`w-full bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm hover:shadow-md transition-all ${idx === 0 ? 'ring-2 ring-blue-500/20 border-blue-300' : ''}`}>
+              <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                <h3 className="font-bold text-slate-900 text-sm sm:text-base">{card.title}</h3>
+                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-slate-100 text-slate-700 border border-slate-200 shrink-0">Tahap {card.step_number}</span>
               </div>
-              <p className="text-sm text-slate-600 mb-3">{card.description}</p>
+              <p className="text-xs sm:text-sm text-slate-600 mb-3">{card.description}</p>
 
               {docsList.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 my-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 my-3">
                   {docsList.map((doc, di) => doc.link ? (
-                    <a key={di} href={doc.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-2.5 rounded-lg border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 transition-colors text-indigo-900 text-xs font-semibold">
-                      <i className={`fa-solid ${doc.icon || 'fa-file-lines'} text-indigo-600 text-sm`} />
-                      <div><strong className="block text-indigo-950">{doc.title} <i className="fa-solid fa-link text-[10px]" /></strong><span className="text-indigo-700 font-normal">{doc.sub}</span></div>
+                    <a key={di} href={doc.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 transition-colors text-indigo-900 text-xs font-semibold">
+                      <i className={`fa-solid ${doc.icon || 'fa-file-lines'} text-indigo-600 text-base shrink-0`} />
+                      <div><strong className="block text-indigo-950">{doc.title} <i className="fa-solid fa-link text-[10px]" /></strong><span className="text-indigo-700 font-normal text-[11px]">{doc.sub}</span></div>
                     </a>
                   ) : (
-                    <div key={di} className="flex items-center gap-3 p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-xs text-slate-800">
-                      <i className={`fa-solid ${doc.icon || 'fa-file-lines'} text-slate-500 text-sm`} />
-                      <div><strong className="block text-slate-900">{doc.title}</strong><span className="text-slate-500">{doc.sub}</span></div>
+                    <div key={di} className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-800">
+                      <i className={`fa-solid ${doc.icon || 'fa-file-lines'} text-slate-500 text-base shrink-0`} />
+                      <div><strong className="block text-slate-900">{doc.title}</strong><span className="text-slate-500 text-[11px]">{doc.sub}</span></div>
                     </div>
                   ))}
                 </div>
               )}
 
               {card.note && (
-                <div className="bg-blue-50 border border-blue-200 text-blue-800 text-xs p-3 rounded-lg flex items-start gap-2 mt-3">
+                <div className="bg-blue-50 border border-blue-200 text-blue-900 text-xs p-3 rounded-xl flex items-start gap-2 mt-3 font-medium">
                   <i className="fa-solid fa-circle-info text-blue-600 mt-0.5 shrink-0" />
                   <span>{card.note}</span>
                 </div>
@@ -176,13 +176,13 @@ function TimelineCards({ cards, prodiList, activeProdi }) {
 function PemetaanTable({ cards, prodiList, activeProdi }) {
   return (
     <div className="mt-10 no-print">
-      <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+      <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
         <i className="fa-solid fa-table-columns text-blue-600" /> Pemetaan Istilah Berdasarkan Program Studi
       </h3>
-      <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-sm bg-white">
-        <table className="w-full text-left text-sm">
+      <div className="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm bg-white">
+        <table className="w-full text-left text-xs sm:text-sm">
           <thead>
-            <tr className="bg-slate-100 border-b border-slate-200 font-bold text-slate-800">
+            <tr className="bg-slate-100 border-b border-slate-200 font-bold text-slate-800 whitespace-nowrap">
               <th className="p-3.5">Tahapan Ujian</th>
               {prodiList.map(p => (
                 <th key={p.code} className={`p-3.5 ${activeProdi === p.code ? 'bg-blue-50 text-blue-900 border-x border-blue-200' : ''}`}>
@@ -194,7 +194,7 @@ function PemetaanTable({ cards, prodiList, activeProdi }) {
           <tbody className="divide-y divide-slate-200">
             {cards.map(item => (
               <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
-                <td className="p-3.5 font-bold text-slate-900">{item.title}</td>
+                <td className="p-3.5 font-bold text-slate-900 whitespace-nowrap">{item.title}</td>
                 {prodiList.map(p => {
                   let term = '-';
                   if (p.code === 'te') term = item.te_term || '-';
@@ -202,7 +202,7 @@ function PemetaanTable({ cards, prodiList, activeProdi }) {
                   else if (p.code === 'tb') term = item.tb_term || '-';
                   else term = item.te_term || item.title;
                   return (
-                    <td key={p.code} className={`p-3.5 text-slate-700 ${activeProdi === p.code ? 'bg-blue-50/50 font-bold text-blue-950 border-x border-blue-200' : ''}`}>
+                    <td key={p.code} className={`p-3.5 text-slate-700 whitespace-nowrap ${activeProdi === p.code ? 'bg-blue-50/50 font-bold text-blue-950 border-x border-blue-200' : ''}`}>
                       {term}
                     </td>
                   );
@@ -325,39 +325,39 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <header className="mb-8">
+      <div className="max-w-5xl mx-auto px-4 py-6 sm:py-10">
+        <header className="mb-6 sm:mb-10">
           <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
-            <img src="/img/image.png" alt="Logo UDINUS" className="h-16 w-auto drop-shadow-md" />
-            <div className="text-center flex-1 min-w-[240px]">
+            <img src="/img/image.png" alt="Logo UDINUS" className="h-12 sm:h-16 w-auto drop-shadow-md" />
+            <div className="text-center flex-1 min-w-[200px]">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-200 mb-2">
                 <i className="fa-solid fa-graduation-cap" /> UDINUS — Fakultas Teknik
               </div>
-              <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Alur Pendaftaran Ujian CD / PT</h1>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Alur Pendaftaran Ujian CD / PT</h1>
             </div>
-            <img src="/img/image-ft.png" alt="Logo FT UDINUS" className="h-16 w-auto drop-shadow-md" />
+            <img src="/img/image-ft.png" alt="Logo FT UDINUS" className="h-12 sm:h-16 w-auto drop-shadow-md" />
           </div>
-          <p className="text-center text-sm text-slate-600 max-w-2xl mx-auto">
+          <p className="text-center text-xs sm:text-sm text-slate-600 max-w-2xl mx-auto">
             Panduan alur pendaftaran dan pemetaan istilah ujian Capstone Design (CD) / Project Terpadu (PT) untuk prodi FT Udinus.
           </p>
         </header>
 
         {/* Sticky Tab Bar */}
-        <div className="sticky top-4 z-30 mb-8">
-          <div className="backdrop-blur-md bg-white/90 border border-slate-200/80 rounded-2xl p-2.5 shadow-lg flex items-center justify-between gap-3 flex-wrap">
+        <div className="sticky top-3 z-30 mb-8">
+          <div className="backdrop-blur-md bg-white/90 border border-slate-200 rounded-2xl p-2.5 shadow-lg flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-2 flex-wrap">
               {prodiList.map(p => {
                 const iconClass = p.icon || (p.code === 'te' ? 'fa-bolt' : p.code === 'tind' ? 'fa-industry' : p.code === 'tb' ? 'fa-heart-pulse' : 'fa-graduation-cap');
                 const isActive = activeProdi === p.code;
                 return (
-                  <button key={p.code} onClick={() => setActiveProdi(p.code)} className={`inline-flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all ${isActive ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
+                  <button key={p.code} onClick={() => setActiveProdi(p.code)} className={`inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-xl transition-all ${isActive ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
                     <i className={`fa-solid ${iconClass}`} style={{ color: isActive ? '#38bdf8' : (p.color || '#0f172a') }} />
                     <span>{p.name}</span>
                   </button>
                 );
               })}
             </div>
-            <button onClick={handlePdfExport} className="no-print inline-flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-all">
+            <button onClick={handlePdfExport} className="no-print inline-flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-all ml-auto sm:ml-0">
               <i className="fa-solid fa-file-pdf" /> <span>Unduh / Cetak PDF</span>
             </button>
           </div>
@@ -365,8 +365,8 @@ export default function HomePage() {
 
         {/* Timeline Cards (web only) */}
         <div className="no-print mb-12">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
               <i className="fa-solid fa-layer-group text-blue-600" /> Tahapan Alur Pendaftaran Ujian
             </h2>
             <span className="text-xs text-slate-500">Pilih prodi untuk melihat istilah spesifik</span>
@@ -376,8 +376,8 @@ export default function HomePage() {
 
         {/* ANSI Flowchart (web + PDF Halaman 1) */}
         <div className="print-page-1 mb-12">
-          <div className="flex items-center justify-between mb-4 no-print">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <div className="flex items-center justify-between mb-4 no-print flex-wrap gap-2">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
               <i className="fa-solid fa-diagram-project text-blue-600" /> Diagram Flowchart Teknik (ANSI Standard)
             </h2>
             <span className="text-xs text-slate-500">Skema alur logika &amp; percabangan prodi</span>
