@@ -198,11 +198,17 @@ function TimelineCards({ cards, prodiList, activeProdi }) {
                       <div className="flex items-start gap-2.5 text-xs font-medium text-blue-950 bg-blue-100/70 border border-blue-200 rounded-lg p-2.5">
                         <i className="fa-solid fa-cloud-arrow-up text-blue-600 text-base shrink-0 mt-0.5" />
                         <div>
-                          <strong className="block text-blue-950 font-bold mb-0.5">Ketentuan Format Berkas:</strong>
+                          <strong className="block text-blue-950 font-bold mb-0.5">Ketentuan Format Berkas &amp; Portal Resmi:</strong>
                           <span>*Semua berkas (No. 1 s/d {docsList.length}) disiapkan dalam <strong>format PDF</strong> dan diunggah di <strong>GDRIVE Pendaftaran MENTORA</strong>.</span>
-                          <div className="mt-1">
-                            <a href="https://kpta.sisfoftudinus.my.id/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-blue-700 hover:text-blue-900 underline font-bold text-[11px]">
-                              Portal MENTORA (kpta.sisfoftudinus.my.id) <i className="fa-solid fa-arrow-up-right-from-square text-[9px]" />
+                          <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
+                            <a href="https://kpta.sisfoftudinus.my.id/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-blue-700 hover:text-blue-900 font-bold bg-white px-2.5 py-1 rounded-lg border border-blue-200 shadow-2xs hover:bg-blue-50 transition-all">
+                              <i className="fa-solid fa-graduation-cap text-blue-600" /> MENTORA (kpta.sisfoftudinus.my.id) <i className="fa-solid fa-arrow-up-right-from-square text-[9px]" />
+                            </a>
+                            <a href="https://alumni.sisfoftudinus.my.id/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-emerald-700 hover:text-emerald-900 font-bold bg-white px-2.5 py-1 rounded-lg border border-emerald-200 shadow-2xs hover:bg-emerald-50 transition-all">
+                              <i className="fa-solid fa-briefcase text-emerald-600" /> Link n Match (alumni.sisfoftudinus.my.id) <i className="fa-solid fa-arrow-up-right-from-square text-[9px]" />
+                            </a>
+                            <a href="https://sisfoftudinus.my.id/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-indigo-700 hover:text-indigo-900 font-bold bg-white px-2.5 py-1 rounded-lg border border-indigo-200 shadow-2xs hover:bg-indigo-50 transition-all">
+                              <i className="fa-solid fa-certificate text-indigo-600" /> Portal SKPI (sisfoftudinus.my.id) <i className="fa-solid fa-arrow-up-right-from-square text-[9px]" />
                             </a>
                           </div>
                         </div>
