@@ -41,7 +41,7 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
 
   return (
     <div className="flex flex-col items-center gap-2 p-2 sm:p-4 w-full max-w-4xl mx-auto overflow-hidden">
-      <div className="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 text-center flex items-center justify-center gap-2">
+      <div className="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 text-center flex items-center justify-center gap-2 no-print">
         <i className="fa-solid fa-diagram-project text-blue-600" /> Skema Alur: {prodiObj.name}
       </div>
       {mainCards.map((c, idx) => {
@@ -63,7 +63,7 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
         const annotationSlot = annotations.length > 0 ? (
           <div className="flex flex-col gap-2 w-full sm:w-56 shrink-0 pt-1">
             {annotations.map((n, ni) => (
-              <div key={ni} className="fc-annotation-parallelogram bg-emerald-50 border border-emerald-400 border-l-4 border-l-emerald-600 rounded-lg p-2.5 text-xs text-emerald-950 font-semibold flex items-start gap-2 shadow-sm">
+              <div key={ni} className="fc-annotation-parallelogram bg-emerald-50 border border-emerald-400 border-l-4 border-l-emerald-600 rounded-lg p-2 text-xs text-emerald-950 font-semibold flex items-start gap-2 shadow-sm">
                 <i className="fa-solid fa-file-lines text-emerald-600 shrink-0 mt-0.5" />
                 <div className="break-words"><strong className="block text-emerald-950">{n.title}</strong>{n.note || n.description}</div>
               </div>
@@ -75,41 +75,41 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
           <div key={c.id} className="w-full flex flex-col items-center">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 w-full max-w-2xl justify-center">
               {isTerminal ? (
-                <div className={`px-5 py-2.5 rounded-full font-bold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 shadow-md shrink-0 text-center max-w-full ${isFirst ? 'bg-slate-900 text-slate-50' : 'bg-emerald-800 text-emerald-50'}`}>
+                <div className={`px-5 py-2 rounded-full font-bold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 shadow-md shrink-0 text-center max-w-full ${isFirst ? 'bg-slate-900 text-slate-50' : 'bg-emerald-800 text-emerald-50'}`}>
                   <i className={`fa-solid ${isFirst ? 'fa-circle-play text-emerald-400' : 'fa-flag-checkered text-amber-300'}`} /> {labelContent}
                 </div>
               ) : isDecision ? (
                 <div className="flex flex-col items-center w-full max-w-md">
-                  <div className="w-32 h-32 sm:w-36 sm:h-36 bg-amber-50 border-2 border-amber-600 rotate-45 flex items-center justify-center my-3 shadow-sm shrink-0">
-                    <div className="-rotate-45 text-center text-[11px] sm:text-xs font-extrabold text-amber-950 p-2 leading-tight max-w-[100px] break-words">
+                  <div className="w-28 h-28 sm:w-36 sm:h-36 bg-amber-50 border-2 border-amber-600 rotate-45 flex items-center justify-center my-2 shadow-sm shrink-0">
+                    <div className="-rotate-45 text-center text-[10px] sm:text-xs font-extrabold text-amber-950 p-2 leading-tight max-w-[90px] sm:max-w-[100px] break-words">
                       {labelContent}
                     </div>
                   </div>
                   <div className="flex justify-between items-start w-full max-w-xs mt-1 gap-2">
                     <div className="flex flex-col items-center flex-1 min-w-0">
-                      <span className="text-[11px] font-extrabold text-red-700 block mb-1">TIDAK / Gagal</span>
+                      <span className="text-[10px] sm:text-[11px] font-extrabold text-red-700 block mb-0.5">TIDAK / Gagal</span>
                       <div className="flex flex-col items-center gap-1 w-full">
-                        <i className="fa-solid fa-arrow-up text-red-600 text-base" />
-                        <div className="bg-red-50 border border-dashed border-red-300 rounded-lg p-1.5 text-[10px] sm:text-[11px] font-bold text-red-900 text-center leading-tight w-full break-words">
+                        <i className="fa-solid fa-arrow-up text-red-600 text-sm" />
+                        <div className="bg-red-50 border border-dashed border-red-300 rounded-lg p-1.5 text-[9px] sm:text-[11px] font-bold text-red-900 text-center leading-tight w-full break-words">
                           Kembali ke:<br />{prevCard ? prevCard.title : 'Proses Sebelumnya'}
                         </div>
                       </div>
                     </div>
                     <div className="flex flex-col items-center flex-1 min-w-0">
-                      <span className="text-[11px] font-extrabold text-emerald-800 block mb-1">YA / Lulus</span>
-                      <i className="fa-solid fa-arrow-down text-emerald-600 text-lg" />
+                      <span className="text-[10px] sm:text-[11px] font-extrabold text-emerald-800 block mb-0.5">YA / Lulus</span>
+                      <i className="fa-solid fa-arrow-down text-emerald-600 text-base" />
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="w-full max-w-md bg-white border-2 border-slate-900 p-3.5 rounded-xl text-center shadow-sm">
+                <div className="w-full max-w-md bg-white border-2 border-slate-900 p-3 rounded-xl text-center shadow-sm">
                   <div className="text-xs sm:text-sm font-bold text-slate-900">{labelContent}</div>
-                  {c.description && <div className="text-xs text-slate-600 mt-1 font-medium">{c.description}</div>}
+                  {c.description && <div className="text-[11px] sm:text-xs text-slate-600 mt-1 font-medium">{c.description}</div>}
                 </div>
               )}
               {annotationSlot}
             </div>
-            {!isLast && <div className="text-slate-700 text-base sm:text-lg py-1"><i className="fa-solid fa-arrow-down" /></div>}
+            {!isLast && <div className="text-slate-700 text-sm sm:text-base py-0.5"><i className="fa-solid fa-arrow-down" /></div>}
           </div>
         );
       })}
@@ -164,7 +164,6 @@ function TimelineCards({ cards, prodiList, activeProdi }) {
                   {/* Isi Accordion Berkas */}
                   {isOpen && (
                     <div className="mt-2.5 p-3.5 rounded-xl border border-blue-200/80 bg-blue-50/40 space-y-3">
-                      {/* Banner Ketentuan PDF & GDRIVE MENTORA */}
                       <div className="flex items-start gap-2.5 text-xs font-medium text-blue-950 bg-blue-100/70 border border-blue-200 rounded-lg p-2.5">
                         <i className="fa-solid fa-cloud-arrow-up text-blue-600 text-base shrink-0 mt-0.5" />
                         <div>
@@ -178,7 +177,6 @@ function TimelineCards({ cards, prodiList, activeProdi }) {
                         </div>
                       </div>
 
-                      {/* Grid Item Berkas */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {docsList.map((doc, di) => doc.link ? (
                           <a key={di} href={doc.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-xl border border-indigo-200 bg-white hover:bg-indigo-50 transition-colors text-indigo-900 text-xs font-semibold shadow-sm">
@@ -228,96 +226,127 @@ function TimelineCards({ cards, prodiList, activeProdi }) {
 function PemetaanTable({ cards, prodiList, activeProdi }) {
   return (
     <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-xs bg-white">
-        <table className="w-full text-left text-xs sm:text-sm">
-          <thead>
-            <tr className="bg-slate-100 border-b border-slate-200 font-bold text-slate-800 whitespace-nowrap">
-              <th className="p-3.5">Tahapan Ujian</th>
-              {prodiList.map(p => (
-                <th key={p.code} className={`p-3.5 ${activeProdi === p.code ? 'bg-blue-50 text-blue-900 border-x border-blue-200' : ''}`}>
-                  <i className={`fa-solid ${p.icon || 'fa-graduation-cap'} mr-1`} style={{ color: p.color || '#2563eb' }} /> {p.code.toUpperCase()}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-200">
-            {cards.map(item => (
-              <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
-                <td className="p-3.5 font-bold text-slate-900 whitespace-nowrap">{item.title}</td>
-                {prodiList.map(p => {
-                  let term = '-';
-                  if (p.code === 'te') term = item.te_term || '-';
-                  else if (p.code === 'tind') term = item.tind_term || '-';
-                  else if (p.code === 'tb') term = item.tb_term || '-';
-                  else term = item.te_term || item.title;
-                  return (
-                    <td key={p.code} className={`p-3.5 text-slate-700 whitespace-nowrap ${activeProdi === p.code ? 'bg-blue-50/50 font-bold text-blue-950 border-x border-blue-200' : ''}`}>
-                      {term}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-  );
-}
-
-// ===== PRINT SECTIONS =====
-function PrintInfoSection({ cards, prodiList, activeProdi }) {
-  const prodiObj = prodiList.find(p => p.code === activeProdi) || { name: activeProdi.toUpperCase() };
-  const validCards = cards.filter(c => !isSkipped(c, activeProdi) && c.shape !== 'note');
-  return (
-    <div className="print-only-section print-page-2">
-      <div className="text-center font-extrabold text-sm mb-3 underline">RINGKASAN INFORMASI TAHAPAN UJIAN</div>
-      {validCards.map(card => {
-        const prodiTerm = getProdiTerm(card, activeProdi);
-        const shapeText = card.shape === 'terminal' ? 'Terminal' : card.shape === 'decision' ? 'Evaluasi / Keputusan' : 'Proses';
-        return (
-          <div key={card.id} className="border border-slate-300 border-l-4 border-l-slate-900 rounded p-2.5 mb-2 text-xs">
-            <div className="flex justify-between items-center mb-1">
-              <strong className="font-bold text-slate-900 text-xs">{card.title}</strong>
-              <span className="bg-slate-200 px-2 py-0.5 rounded font-bold text-[10px] text-slate-700">Tahap {card.step_number} — {shapeText}</span>
-            </div>
-            <div className="text-slate-700 mb-1">{card.description}</div>
-            {prodiTerm && <div className="text-blue-800 font-bold">{prodiObj.name}: {prodiTerm}</div>}
-            {getCleanNote(card.note, activeProdi) && <div className="text-emerald-800 italic mt-1">ℹ️ {getCleanNote(card.note, activeProdi)}</div>}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function PrintParafSection({ cards }) {
-  const firstCard = cards.find(c => c.step_number === 1) || cards[0];
-  let adminDocs = [];
-  try { adminDocs = JSON.parse(firstCard?.docs_json || '[]'); } catch (e) {}
-  return (
-    <div className="print-only-section">
-      <div className="text-center font-extrabold text-sm mb-3 underline">LEMBAR KONTROL KELENGKAPAN ADMINISTRASI &amp; PARAF VERIFIKASI</div>
-      <table className="w-full border-collapse border border-slate-900 text-xs">
+      <table className="w-full text-left text-xs sm:text-sm">
         <thead>
-          <tr className="bg-slate-100 border-b border-slate-900">
-            <th className="p-2 border-r border-slate-900 text-center w-10">No</th>
-            <th className="p-2 border-r border-slate-900 text-left">Berkas Persyaratan Administrasi</th>
-            <th className="p-2 border-r border-slate-900 text-left">Keterangan / Sumber</th>
-            <th className="p-2 border-r border-slate-900 text-center w-28">Status</th>
-            <th className="p-2 text-center w-36">Paraf / TTD Verifikator</th>
+          <tr className="bg-slate-100 border-b border-slate-200 font-bold text-slate-800 whitespace-nowrap">
+            <th className="p-3.5">Tahapan Ujian</th>
+            {prodiList.map(p => (
+              <th key={p.code} className={`p-3.5 ${activeProdi === p.code ? 'bg-blue-50 text-blue-900 border-x border-blue-200' : ''}`}>
+                <i className={`fa-solid ${p.icon || 'fa-graduation-cap'} mr-1`} style={{ color: p.color || '#2563eb' }} /> {p.code.toUpperCase()}
+              </th>
+            ))}
           </tr>
         </thead>
-        <tbody>
-          {adminDocs.map((doc, idx) => (
-            <tr key={idx} className="border-b border-slate-900">
-              <td className="p-2 border-r border-slate-900 text-center font-bold">{idx + 1}</td>
-              <td className="p-2 border-r border-slate-900 font-bold text-slate-900">{doc.title}</td>
-              <td className="p-2 border-r border-slate-900 text-slate-700">{doc.sub}</td>
-              <td className="p-2 border-r border-slate-900 text-center text-slate-500">[ Lengkap ]</td>
-              <td className="p-2 text-center text-slate-500 h-10 vertical-bottom">[ Paraf / Ttd ]</td>
+        <tbody className="divide-y divide-slate-200">
+          {cards.map(item => (
+            <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+              <td className="p-3.5 font-bold text-slate-900 whitespace-nowrap">{item.title}</td>
+              {prodiList.map(p => {
+                let term = '-';
+                if (p.code === 'te') term = item.te_term || '-';
+                else if (p.code === 'tind') term = item.tind_term || '-';
+                else if (p.code === 'tb') term = item.tb_term || '-';
+                else term = item.te_term || item.title;
+                return (
+                  <td key={p.code} className={`p-3.5 text-slate-700 whitespace-nowrap ${activeProdi === p.code ? 'bg-blue-50/50 font-bold text-blue-950 border-x border-blue-200' : ''}`}>
+                    {term}
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+// ===== PRINT SECTIONS (PRESISI 2 HALAMAN A4 PORTRAIT) =====
+function PrintPage1Timeline({ cards, prodiList, activeProdi }) {
+  const prodiObj = prodiList.find(p => p.code === activeProdi) || { name: activeProdi.toUpperCase() };
+  const validCards = cards.filter(c => !isSkipped(c, activeProdi));
+
+  return (
+    <div className="pdf-page-1 print-only-section">
+      <div className="print-header">
+        <div className="print-kop-wrapper">
+          <img src="/img/image.png" alt="Logo UDINUS" className="print-logo-left" />
+          <div className="print-kop-text">
+            <h2>UNIVERSITAS DIAN NUSWANTORO</h2>
+            <h3>FAKULTAS TEKNIK</h3>
+            <p>Jl. Nakula I No. 5-11 Semarang | Telp. (024) 3517261 | Website: ft.dinus.ac.id</p>
+            <h4>ALUR PENDAFTARAN UJIAN ({prodiObj.name})</h4>
+          </div>
+          <img src="/img/image-ft.png" alt="Logo FT UDINUS" className="print-logo-right" />
+        </div>
+      </div>
+
+      <div className="text-center font-extrabold text-[9.5pt] mb-2 uppercase tracking-wider text-slate-900 border-b border-black pb-1">
+        HALAMAN 1: TAHAPAN ALUR PENDAFTARAN &amp; BERKAS PERSYARATAN ({prodiObj.name})
+      </div>
+
+      <div className="space-y-1.5">
+        {validCards.map(card => {
+          const prodiTerm = getProdiTerm(card, activeProdi);
+          let docsList = [];
+          try { docsList = JSON.parse(card.docs_json || '[]'); } catch (e) {}
+          const cleanNote = getCleanNote(card.note, activeProdi);
+
+          return (
+            <div key={card.id} className="border border-slate-400 rounded p-2 text-[8.5pt] leading-tight bg-white">
+              <div className="flex justify-between items-center mb-0.5">
+                <strong className="font-bold text-slate-900 text-[9pt]">{card.title}</strong>
+                <span className="bg-slate-100 text-slate-900 text-[7.5pt] font-bold px-1.5 py-0.5 rounded border border-slate-300">
+                  Tahap {card.step_number} {prodiTerm ? `— ${prodiTerm}` : ''}
+                </span>
+              </div>
+              <p className="text-slate-700 text-[8pt] mb-1">{card.description}</p>
+              {cleanNote && <div className="text-blue-900 text-[7.5pt] italic mb-1 font-semibold">ℹ️ {cleanNote}</div>}
+              {docsList.length > 0 && (
+                <div className="bg-slate-50 border border-slate-300 rounded p-1.5 text-[7pt]">
+                  <strong className="block text-slate-900 font-bold mb-0.5">
+                    Berkas Persyaratan (PDF di GDRIVE MENTORA - kpta.sisfoftudinus.my.id):
+                  </strong>
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+                    {docsList.map((doc, di) => (
+                      <span key={di} className="truncate text-slate-800 font-medium">
+                        {di + 1}. {doc.title} {doc.sub ? `(${doc.sub})` : ''}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function PrintPage2Flowchart({ cards, prodiList, activeProdi }) {
+  const prodiObj = prodiList.find(p => p.code === activeProdi) || { name: activeProdi.toUpperCase() };
+
+  return (
+    <div className="pdf-page-2 print-only-section">
+      <div className="print-header">
+        <div className="print-kop-wrapper">
+          <img src="/img/image.png" alt="Logo UDINUS" className="print-logo-left" />
+          <div className="print-kop-text">
+            <h2>UNIVERSITAS DIAN NUSWANTORO</h2>
+            <h3>FAKULTAS TEKNIK</h3>
+            <p>Jl. Nakula I No. 5-11 Semarang | Telp. (024) 3517261 | Website: ft.dinus.ac.id</p>
+            <h4>DIAGRAM ALUR LOGIKA UJIAN ({prodiObj.name})</h4>
+          </div>
+          <img src="/img/image-ft.png" alt="Logo FT UDINUS" className="print-logo-right" />
+        </div>
+      </div>
+
+      <div className="text-center font-extrabold text-[9.5pt] mb-2 uppercase tracking-wider text-slate-900 border-b border-black pb-1">
+        HALAMAN 2: DIAGRAM ALUR UJIAN ({prodiObj.name})
+      </div>
+
+      <AnsiFlowchart cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
     </div>
   );
 }
@@ -407,20 +436,6 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Kop Surat PDF */}
-      <div className="print-header">
-        <div className="print-kop-wrapper">
-          <img src="/img/image.png" alt="Logo UDINUS" className="print-logo-left" />
-          <div className="print-kop-text">
-            <h2>UNIVERSITAS DIAN NUSWANTORO</h2>
-            <h3>FAKULTAS TEKNIK</h3>
-            <p>Jl. Nakula I No. 5-11 Semarang | Telp. (024) 3517261 | Website: ft.dinus.ac.id</p>
-            <h4>LEMBAR KONTROL KELENGKAPAN ADMINISTRASI &amp; PARAF VERIFIKASI</h4>
-          </div>
-          <img src="/img/image-ft.png" alt="Logo FT UDINUS" className="print-logo-right" />
-        </div>
-      </div>
-
       <div className="max-w-5xl mx-auto px-4 py-6 sm:py-10">
         <header className="mb-6 sm:mb-10">
           <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
@@ -454,7 +469,7 @@ export default function HomePage() {
                 );
               })}
             </div>
-            <button onClick={handlePdfExport} className="no-print inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-all shrink-0 whitespace-nowrap">
+            <button onClick={handlePdfExport} className="no-print inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-all shrink-0 whitespace-nowrap cursor-pointer">
               <i className="fa-solid fa-file-pdf" />
               <span className="hidden sm:inline">Unduh / Cetak PDF</span>
               <span className="inline sm:hidden">PDF</span>
@@ -493,32 +508,30 @@ export default function HomePage() {
         </div>
 
         {/* Section 2: Diagram Alur Ujian (default TERBUKA) */}
-        <div className="print-page-1 mb-8 bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm">
-          <div className="no-print">
-            <button
-              onClick={() => toggleSection('flowchart')}
-              className="w-full flex items-center justify-between gap-2 text-left cursor-pointer group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 text-base font-bold shadow-xs">
-                  <i className="fa-solid fa-diagram-project" />
-                </div>
-                <div>
-                  <h2 className="text-base sm:text-lg font-extrabold text-slate-900 group-hover:text-amber-600 transition-colors">
-                    Diagram Alur Ujian ({activeProdiObj.name})
-                  </h2>
-                  <span className="text-xs text-slate-500 hidden sm:inline">Skema alur logika & percabangan {activeProdiObj.name}</span>
-                </div>
+        <div className="no-print mb-8 bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm">
+          <button
+            onClick={() => toggleSection('flowchart')}
+            className="w-full flex items-center justify-between gap-2 text-left cursor-pointer group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 text-base font-bold shadow-xs">
+                <i className="fa-solid fa-diagram-project" />
               </div>
-              <div className="flex items-center gap-1.5 text-amber-800 font-bold text-xs bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200/60">
-                <span>{openSections.flowchart ? 'Sembunyikan' : 'Tampilkan'}</span>
-                <i className={`fa-solid fa-chevron-down text-xs transition-transform duration-200 ${openSections.flowchart ? 'rotate-180' : ''}`} />
+              <div>
+                <h2 className="text-base sm:text-lg font-extrabold text-slate-900 group-hover:text-amber-600 transition-colors">
+                  Diagram Alur Ujian ({activeProdiObj.name})
+                </h2>
+                <span className="text-xs text-slate-500 hidden sm:inline">Skema alur logika & percabangan {activeProdiObj.name}</span>
               </div>
-            </button>
-          </div>
+            </div>
+            <div className="flex items-center gap-1.5 text-amber-800 font-bold text-xs bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200/60">
+              <span>{openSections.flowchart ? 'Sembunyikan' : 'Tampilkan'}</span>
+              <i className={`fa-solid fa-chevron-down text-xs transition-transform duration-200 ${openSections.flowchart ? 'rotate-180' : ''}`} />
+            </div>
+          </button>
 
-          {(openSections.flowchart || typeof window === 'undefined') && (
-            <div className="mt-4 pt-4 sm:pt-5 border-t border-slate-100 no-print-border-t">
+          {openSections.flowchart && (
+            <div className="mt-4 pt-4 sm:pt-5 border-t border-slate-100">
               {loading ? <FlowchartSkeleton /> : <AnsiFlowchart cards={cards} prodiList={prodiList} activeProdi={activeProdi} />}
             </div>
           )}
@@ -554,15 +567,13 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* PDF: Halaman 2 — Ringkasan Informatif */}
-        <PrintInfoSection cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
-
-        {/* PDF: Halaman 3 — Form Paraf */}
-        <PrintParafSection cards={cards} />
+        {/* PDF EXPORT SECTIONS: EXACT 2 PAGES A4 PORTRAIT */}
+        <PrintPage1Timeline cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
+        <PrintPage2Flowchart cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
 
         {/* Print Footer */}
         <div className="print-footer">
-          <div className="flex justify-between text-[10px] border-t border-black pt-1.5">
+          <div className="flex justify-between text-[9px] border-t border-black pt-1">
             <span id="print-timestamp-info">Dicetak pada: -</span>
             <span id="print-prodi-info">Program Studi: -</span>
             <span>Dokumen Resmi Fakultas Teknik UDINUS</span>

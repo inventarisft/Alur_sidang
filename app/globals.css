@@ -17,36 +17,96 @@ body {
   min-height: 100vh;
 }
 
-/* Print CSS for PDF generator */
+/* Print CSS for PDF generator (Exact 2 Pages A4 Portrait) */
 .print-header, .print-only-section, .print-footer { display: none; }
 
-@media print {
-  body { background: #ffffff !important; color: #000000 !important; font-family: Arial, sans-serif !important; }
-  .no-print { display: none !important; }
-  .print-header { display: block !important; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
-  .print-kop-wrapper { display: flex; align-items: center; justify-content: space-between; gap: 15px; }
-  .print-logo-left, .print-logo-right { height: 60px; width: auto; }
-  .print-kop-text { text-align: center; flex: 1; }
-  .print-kop-text h2 { font-size: 14pt; font-weight: bold; margin: 0; }
-  .print-kop-text h3 { font-size: 12pt; font-weight: bold; margin: 0; }
-  .print-kop-text p { font-size: 9pt; margin: 2px 0 6px 0; }
-  .print-kop-text h4 { font-size: 10pt; font-weight: bold; text-transform: uppercase; border-top: 1px solid #000; padding-top: 4px; display: inline-block; margin: 0; }
-
-  .print-only-section { display: block !important; margin-top: 20px; }
-  .print-page-1 { page-break-after: always; page-break-inside: avoid; }
-  .print-page-2 { page-break-after: always; page-break-inside: avoid; }
-
-  .print-footer { display: block !important; position: fixed; bottom: 0; left: 0; right: 0; background: #fff; padding-top: 5px; }
-
-  .ansi-flowchart-wrapper { padding: 0 !important; width: 100% !important; }
-  .fc-row-with-note { max-width: 100% !important; gap: 8px !important; }
-  .fc-node-process, .fc-node-terminal, .fc-decision-wrapper { max-width: 100% !important; }
-
-  table { page-break-inside: auto; }
-  tr { page-break-inside: avoid; page-break-after: auto; }
+@page {
+  size: A4 portrait;
+  margin: 8mm 10mm;
 }
 
-/* Spezial ANSI Flowchart Helpers */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .pdf-page-1 {
+    page-break-after: always !important;
+    break-after: page !important;
+    display: block !important;
+  }
+  .pdf-page-2 {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+    display: block !important;
+  }
+  .print-header {
+    display: block !important;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #000;
+    padding-bottom: 6px;
+  }
+  .print-kop-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .print-logo-left, .print-logo-right {
+    height: 44px;
+    width: auto;
+  }
+  .print-kop-text {
+    text-align: center;
+    flex: 1;
+  }
+  .print-kop-text h2 {
+    font-size: 11pt;
+    font-weight: bold;
+    margin: 0;
+  }
+  .print-kop-text h3 {
+    font-size: 9.5pt;
+    font-weight: bold;
+    margin: 0;
+  }
+  .print-kop-text p {
+    font-size: 7.5pt;
+    margin: 1px 0 3px 0;
+  }
+  .print-kop-text h4 {
+    font-size: 8.5pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    border-top: 1px solid #000;
+    padding-top: 2px;
+    display: inline-block;
+    margin: 0;
+  }
+
+  .print-footer {
+    display: block !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    padding-top: 4px;
+  }
+
+  .ansi-flowchart-wrapper {
+    padding: 0 !important;
+    width: 100% !important;
+  }
+}
+
+/* Specialty Flowchart Helpers */
 .fc-annotation-parallelogram {
   transform: skewX(-5deg);
 }
