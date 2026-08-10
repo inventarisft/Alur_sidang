@@ -34,7 +34,11 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
 
   const noteMap = {};
   noteCards.forEach(n => {
-    const key = n.step_number;
+    let key = n.step_number;
+    // Jika tidak ada mainCard dengan step_number sama, tempelkan ke step_number sebelumnya
+    if (!mainCards.some(mc => mc.step_number === key) && key > 1) {
+      key = key - 1;
+    }
     if (!noteMap[key]) noteMap[key] = [];
     noteMap[key].push(n);
   });
@@ -50,6 +54,7 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
         const isTerminal = c.shape === 'terminal' || isFirst || isLast;
         const isDecision = c.shape === 'decision';
         const prodiTerm = getProdiTerm(c, activeProdi);
+        const cleanNote = getCleanNote(c.note, activeProdi);
         const annotations = (noteMap[c.step_number] || []);
         const prevCard = idx > 0 ? mainCards[idx - 1] : null;
 
@@ -64,8 +69,12 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
           <div className="flex flex-col gap-1.5 w-full sm:w-56 shrink-0 pt-1">
             {annotations.map((n, ni) => (
               <div key={ni} className="fc-annotation-parallelogram bg-emerald-50 border border-emerald-400 border-l-4 border-l-emerald-600 rounded-lg p-2 text-xs text-emerald-950 font-semibold flex items-start gap-2 shadow-xs">
-                <i className="fa-solid fa-file-lines text-emerald-600 shrink-0 mt-0.5" />
-                <div className="break-words"><strong className="block text-emerald-950">{n.title}</strong>{n.note || n.description}</div>
+                <i className="fa-solid fa-file-shield text-emerald-600 shrink-0 mt-0.5" />
+                <div className="break-words">
+                  <strong className="block text-emerald-950">{n.title}</strong>
+                  <span className="text-[11px] font-medium text-emerald-900 block">{n.description}</span>
+                  {n.note && <span className="text-[10px] text-emerald-800 italic block mt-0.5">ℹ️ {n.note}</span>}
+                </div>
               </div>
             ))}
           </div>
@@ -75,13 +84,21 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
           <div key={c.id} className="w-full flex flex-col items-center">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3 w-full max-w-2xl justify-center">
               {isTerminal ? (
-                <div className={`px-4 py-2 rounded-full font-bold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 shadow-sm shrink-0 text-center max-w-full ${isFirst ? 'bg-slate-900 text-slate-50' : 'bg-emerald-800 text-emerald-50'}`}>
-                  <i className={`fa-solid ${isFirst ? 'fa-circle-play text-emerald-400' : 'fa-flag-checkered text-amber-300'}`} /> {labelContent}
+                <div className="flex flex-col items-center">
+                  <div className={`px-4 py-2 rounded-full font-bold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 shadow-sm shrink-0 text-center max-w-full ${isFirst ? 'bg-slate-900 text-slate-50' : 'bg-emerald-800 text-emerald-50'}`}>
+                    <i className={`fa-solid ${isFirst ? 'fa-circle-play text-emerald-400' : 'fa-flag-checkered text-amber-300'}`} /> {labelContent}
+                  </div>
+                  {cleanNote && (
+                    <div className="mt-1 bg-blue-50 border border-blue-200 text-blue-900 text-[9px] sm:text-[10px] font-semibold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs max-w-xs text-center">
+                      <i className="fa-solid fa-circle-info text-blue-600 shrink-0" />
+                      <span>{cleanNote}</span>
+                    </div>
+                  )}
                 </div>
               ) : isDecision ? (
                 <div className="flex flex-col items-center w-full max-w-md">
-                  <div className="w-24 h-24 sm:w-36 sm:h-36 bg-amber-50 border-2 border-amber-600 rotate-45 flex items-center justify-center my-1.5 sm:my-2 shadow-xs shrink-0">
-                    <div className="-rotate-45 text-center text-[9px] sm:text-xs font-extrabold text-amber-950 p-1.5 leading-tight max-w-[80px] sm:max-w-[100px] break-words">
+                  <div className="w-28 h-28 sm:w-36 sm:h-36 bg-amber-50 border-2 border-amber-600 rotate-45 flex items-center justify-center my-1.5 sm:my-2 shadow-xs shrink-0">
+                    <div className="-rotate-45 text-center text-[9px] sm:text-xs font-extrabold text-amber-950 p-1.5 leading-tight max-w-[85px] sm:max-w-[100px] break-words">
                       {labelContent}
                     </div>
                   </div>
@@ -105,6 +122,12 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
                 <div className="w-full max-w-md bg-white border-2 border-slate-900 p-2.5 sm:p-3 rounded-xl text-center shadow-xs">
                   <div className="text-xs sm:text-sm font-bold text-slate-900">{labelContent}</div>
                   {c.description && <div className="text-[10px] sm:text-xs text-slate-600 mt-0.5 font-medium">{c.description}</div>}
+                  {cleanNote && (
+                    <div className="mt-1.5 bg-blue-50 border border-blue-200 text-blue-900 text-[9.5px] sm:text-[10.5px] font-semibold px-2 py-1 rounded-lg inline-flex items-center justify-center gap-1 w-full text-center">
+                      <i className="fa-solid fa-circle-info text-blue-600 shrink-0" />
+                      <span>{cleanNote}</span>
+                    </div>
+                  )}
                 </div>
               )}
               {annotationSlot}
