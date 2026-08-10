@@ -381,21 +381,32 @@ export default function HomePage() {
     try {
       pdfTarget.style.display = 'block';
 
-      // Import html2pdf.js secara langsung dari node_modules
-      const html2pdf = (await import('html2pdf.js')).default;
+      // Load html2pdf script otomatis jika belum ada di window
+      if (typeof window !== 'undefined' && !window.html2pdf) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+          script.onload = resolve;
+          script.onerror = () => reject(new Error('Gagal memuat pustaka PDF'));
+          document.head.appendChild(script);
+        });
+      }
 
-      const opt = {
-        margin:       [2, 4, 2, 4], // mm top, left, bottom, right (tanpa buang space)
-        filename:     `Alur_Ujian_${(prodiMatch?.code || activeProdi).toUpperCase()}_UDINUS.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
-
-      await html2pdf().set(opt).from(pdfTarget).save();
+      if (window.html2pdf) {
+        const opt = {
+          margin:       [2, 4, 2, 4], // mm (zero wasted margin)
+          filename:     `Alur_Ujian_${(prodiMatch?.code || activeProdi).toUpperCase()}_UDINUS.pdf`,
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true, logging: false },
+          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        await window.html2pdf().set(opt).from(pdfTarget).save();
+      } else {
+        window.print();
+      }
     } catch (e) {
       console.error('html2pdf error:', e);
-      alert('Gagal membuat PDF: ' + e.message);
+      window.print();
     } finally {
       pdfTarget.style.display = 'none';
       setPdfLoading(false);
