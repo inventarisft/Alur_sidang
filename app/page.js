@@ -25,7 +25,114 @@ function getCleanNote(note, activeProdi) {
   return note;
 }
 
-// ===== FLOWCHART =====
+// ===== FLOWCHART FOR PDF (EXPLICIT HEX STYLES - ZERO OKLCH/LAB ERRORS) =====
+function PdfFlowchart({ cards, prodiList, activeProdi }) {
+  const prodiObj = prodiList.find(p => p.code === activeProdi) || { name: activeProdi.toUpperCase() };
+  const isNote = c => c.shape === 'note';
+  const noteCards = cards.filter(c => isNote(c) && !isSkipped(c, activeProdi));
+  const mainCards = cards.filter(c => !isSkipped(c, activeProdi) && !isNote(c));
+
+  const noteMap = {};
+  noteCards.forEach(n => {
+    let key = n.step_number;
+    if (!mainCards.some(mc => mc.step_number === key) && key > 1) {
+      key = key - 1;
+    }
+    if (!noteMap[key]) noteMap[key] = [];
+    noteMap[key].push(n);
+  });
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', width: '100%', maxWidth: '620px', margin: '0 auto' }}>
+      {mainCards.map((c, idx) => {
+        const isFirst = idx === 0;
+        const isLast = idx === mainCards.length - 1;
+        const isTerminal = c.shape === 'terminal' || isFirst || isLast;
+        const isDecision = c.shape === 'decision';
+        const prodiTerm = getProdiTerm(c, activeProdi);
+        const cleanNote = getCleanNote(c.note, activeProdi);
+        const annotations = (noteMap[c.step_number] || []);
+        const prevCard = idx > 0 ? mainCards[idx - 1] : null;
+
+        const getLabelContent = (termColor = "#2563eb") => (
+          <span style={{ fontWeight: 'bold' }}>
+            {c.title}
+            {prodiTerm && <span style={{ color: termColor, fontWeight: '600', display: 'block', fontSize: '8.5px', marginTop: '1px' }}>({prodiTerm})</span>}
+          </span>
+        );
+
+        const annotationSlot = annotations.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '160px', flexShrink: 0, paddingTop: '2px' }}>
+            {annotations.map((n, ni) => (
+              <div key={ni} style={{ backgroundColor: '#ecfdf5', border: '1px solid #34d399', borderLeft: '4px solid #059669', borderRadius: '6px', padding: '5px', fontSize: '8.5px', color: '#064e3b', fontWeight: '600' }}>
+                <strong style={{ display: 'block', color: '#064e3b' }}>{n.title}</strong>
+                <span style={{ fontSize: '8px', fontWeight: '500', display: 'block' }}>{n.description}</span>
+                {n.note && <span style={{ fontSize: '7.5px', fontStyle: 'italic', display: 'block', marginTop: '1px' }}>ℹ️ {n.note}</span>}
+              </div>
+            ))}
+          </div>
+        ) : null;
+
+        return (
+          <div key={c.id} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', width: '100%', justifyContent: 'center' }}>
+              {isTerminal ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div style={{ padding: '5px 14px', borderRadius: '9999px', fontWeight: 'bold', fontSize: '9.5px', backgroundColor: isFirst ? '#0f172a' : '#065f46', color: '#ffffff', textAlign: 'center' }}>
+                    {getLabelContent(isFirst ? "#38bdf8" : "#fef08a")}
+                  </div>
+                  {cleanNote && (
+                    <div style={{ marginTop: '2px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', color: '#1e3a8a', fontSize: '7.5px', fontWeight: '600', padding: '2px 6px', borderRadius: '4px', textAlign: 'center', maxWidth: '240px' }}>
+                      ℹ️ {cleanNote}
+                    </div>
+                  )}
+                </div>
+              ) : isDecision ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '450px', position: 'relative' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', position: 'relative', minHeight: '110px' }}>
+                    {/* CABANG KIRI: TIDAK / GAGAL */}
+                    <div style={{ position: 'absolute', left: '0px', top: '50%', transform: 'translateY(-50%)', backgroundColor: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '6px', padding: '5px', color: '#7f1d1d', fontSize: '8px', fontWeight: 'bold', maxWidth: '135px', zIndex: 10 }}>
+                      <span style={{ display: 'block', color: '#b91c1c', fontWeight: '800', textTransform: 'uppercase' }}>TIDAK / Gagal</span>
+                      <span style={{ fontSize: '7.5px', color: '#7f1d1d' }}>Ulang: {prevCard ? prevCard.title : 'Proses Sebelumnya'}</span>
+                    </div>
+
+                    {/* BELAH KETUPAT */}
+                    <div style={{ width: '90px', height: '90px', backgroundColor: '#fffbeb', border: '2px solid #d97706', transform: 'rotate(45deg)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '8px 0' }}>
+                      <div style={{ transform: 'rotate(-45deg)', textAlign: 'center', fontSize: '8px', fontWeight: '800', color: '#78350f', padding: '3px', maxWidth: '70px' }}>
+                        {getLabelContent("#b45309")}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* CABANG BAWAH: YA / LULUS */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#059669', marginTop: '-4px' }}>
+                    <div style={{ backgroundColor: '#ecfdf5', border: '1px solid #6ee7b7', borderRadius: '9999px', padding: '1px 8px', color: '#065f46', fontSize: '7.5px', fontWeight: '800' }}>
+                      YA / Lulus ▼
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ width: '100%', maxWidth: '320px', backgroundColor: '#ffffff', border: '2px solid #0f172a', padding: '6px', borderRadius: '8px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '9.5px', fontWeight: 'bold', color: '#0f172a' }}>{getLabelContent()}</div>
+                  {c.description && <div style={{ fontSize: '8px', color: '#475569', marginTop: '2px', fontWeight: '500' }}>{c.description}</div>}
+                  {cleanNote && (
+                    <div style={{ marginTop: '3px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', color: '#1e3a8a', fontSize: '7.5px', fontWeight: '600', padding: '2px', borderRadius: '4px' }}>
+                      ℹ️ {cleanNote}
+                    </div>
+                  )}
+                </div>
+              )}
+              {annotationSlot}
+            </div>
+            {!isLast && <div style={{ color: '#334155', fontSize: '10px', padding: '1px 0' }}>↓</div>}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ===== FLOWCHART FOR WEB INTERFACE =====
 function AnsiFlowchart({ cards, prodiList, activeProdi }) {
   const prodiObj = prodiList.find(p => p.code === activeProdi) || { name: activeProdi.toUpperCase() };
   const isNote = c => c.shape === 'note';
@@ -97,9 +204,7 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
                 </div>
               ) : isDecision ? (
                 <div className="flex flex-col items-center w-full max-w-xl my-1 sm:my-2 relative">
-                  {/* Container Belah Ketupat & Cabang Kiri */}
                   <div className="flex items-center justify-center w-full relative min-h-[130px] sm:min-h-[160px]">
-                    {/* SISI KIRI: CABANG TIDAK / GAGAL */}
                     <div className="absolute left-0 sm:left-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 bg-red-50 border border-red-300 rounded-xl p-2 sm:p-2.5 text-red-950 text-xs font-bold shadow-xs max-w-[140px] sm:max-w-[190px] z-10">
                       <i className="fa-solid fa-arrow-turn-up text-red-600 text-sm sm:text-base shrink-0 transform -scale-x-100" />
                       <div className="leading-tight">
@@ -108,7 +213,6 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
                       </div>
                     </div>
 
-                    {/* BELAH KETUPAT (DI TENGAH) */}
                     <div className="w-28 h-28 sm:w-36 sm:h-36 bg-amber-50 border-2 border-amber-600 rotate-45 flex items-center justify-center shadow-xs shrink-0 relative z-0">
                       <div className="-rotate-45 text-center text-[9px] sm:text-xs font-extrabold text-amber-950 p-1.5 leading-tight max-w-[85px] sm:max-w-[100px] break-words">
                         {getLabelContent("text-amber-800")}
@@ -116,7 +220,6 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
                     </div>
                   </div>
 
-                  {/* SISI BAWAH: CABANG YA / LULUS */}
                   <div className="flex flex-col items-center justify-center text-emerald-600 -mt-2 sm:-mt-3 z-10">
                     <div className="flex items-center gap-1 bg-emerald-50 border border-emerald-400 rounded-full px-3 py-0.5 text-emerald-950 text-[9px] sm:text-xs font-bold shadow-xs">
                       <span className="text-emerald-800 font-extrabold uppercase">YA / Lulus</span>
@@ -381,7 +484,7 @@ export default function HomePage() {
     try {
       pdfTarget.style.display = 'block';
 
-      // Load html2pdf script otomatis jika belum ada di window
+      // Load html2pdf script otomatis dari CDN jika belum dimuat
       if (typeof window !== 'undefined' && !window.html2pdf) {
         await new Promise((resolve, reject) => {
           const script = document.createElement('script');
@@ -394,10 +497,15 @@ export default function HomePage() {
 
       if (window.html2pdf) {
         const opt = {
-          margin:       [2, 4, 2, 4], // mm (zero wasted margin)
+          margin:       [2, 3, 2, 3], // mm (zero wasted margin)
           filename:     `Alur_Ujian_${(prodiMatch?.code || activeProdi).toUpperCase()}_UDINUS.pdf`,
           image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  { scale: 2, useCORS: true, logging: false },
+          html2canvas:  {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+          },
           jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
         await window.html2pdf().set(opt).from(pdfTarget).save();
@@ -561,33 +669,33 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* PDF DIRECT EXPORTER (EXACT 2 PAGES A4 PORTRAIT, ZERO OVERFLOW) */}
-        <div id="pdf-export-container" style={{ display: 'none' }} className="bg-white text-black p-0 m-0 w-[210mm]">
+        {/* PDF DIRECT EXPORTER (PURE HEX STYLES - ZERO LAB/OKLCH COLOR ERRORS - EXACT 2 PAGES A4) */}
+        <div id="pdf-export-container" style={{ display: 'none', backgroundColor: '#ffffff', color: '#0f172a', width: '206mm' }}>
           {/* HALAMAN 1 */}
-          <div className="bg-white px-3 py-2 text-black w-[210mm] h-[280mm] max-h-[280mm] overflow-hidden box-border relative flex flex-col justify-between" style={{ pageBreakAfter: 'always', breakAfter: 'page' }}>
+          <div style={{ backgroundColor: '#ffffff', color: '#0f172a', width: '206mm', height: '276mm', maxHeight: '276mm', overflow: 'hidden', boxSizing: 'border-box', padding: '8px 10px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', pageBreakAfter: 'always', breakAfter: 'page' }}>
             <div>
               {/* KOP SURAT */}
-              <div className="border-b-2 border-black pb-1 mb-1.5">
-                <div className="flex items-center justify-between gap-3">
-                  <img src="/img/image.png" alt="Logo UDINUS" className="h-8 w-auto" />
-                  <div className="text-center flex-1">
-                    <h2 className="text-[9.5pt] font-bold leading-none m-0">UNIVERSITAS DIAN NUSWANTORO</h2>
-                    <h3 className="text-[8pt] font-bold leading-tight m-0">FAKULTAS TEKNIK</h3>
-                    <p className="text-[6pt] m-0 leading-tight">Jl. Nakula I No. 5-11 Semarang | Telp. (024) 3517261 | Website: ft.dinus.ac.id</p>
-                    <h4 className="text-[7pt] font-bold uppercase m-0 pt-0.5 border-t border-black inline-block">
+              <div style={{ borderBottom: '2px solid #000000', paddingBottom: '4px', marginBottom: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                  <img src="/img/image.png" alt="Logo UDINUS" style={{ height: '32px', width: 'auto' }} />
+                  <div style={{ textAlign: 'center', flex: 1 }}>
+                    <h2 style={{ fontSize: '10pt', fontWeight: 'bold', margin: 0, padding: 0, color: '#000000' }}>UNIVERSITAS DIAN NUSWANTORO</h2>
+                    <h3 style={{ fontSize: '8.5pt', fontWeight: 'bold', margin: 0, padding: 0, color: '#000000' }}>FAKULTAS TEKNIK</h3>
+                    <p style={{ fontSize: '6.5pt', margin: '1px 0', padding: 0, color: '#334155' }}>Jl. Nakula I No. 5-11 Semarang | Telp. (024) 3517261 | Website: ft.dinus.ac.id</p>
+                    <h4 style={{ fontSize: '7.5pt', fontWeight: 'bold', textTransform: 'uppercase', margin: 0, paddingTop: '1px', borderTop: '1px solid #000000', display: 'inline-block', color: '#000000' }}>
                       ALUR PENDAFTARAN UJIAN ({activeProdiObj.name})
                     </h4>
                   </div>
-                  <img src="/img/image-ft.png" alt="Logo FT UDINUS" className="h-8 w-auto" />
+                  <img src="/img/image-ft.png" alt="Logo FT UDINUS" style={{ height: '32px', width: 'auto' }} />
                 </div>
               </div>
 
-              <div className="text-center font-extrabold text-[7.5pt] mb-1 uppercase tracking-wider text-slate-900 border-b border-black pb-0.5">
+              <div style={{ textAlign: 'center', fontWeight: '800', fontSize: '8pt', marginBottom: '4px', textTransform: 'uppercase', color: '#0f172a', borderBottom: '1px solid #000000', paddingBottom: '2px' }}>
                 HALAMAN 1: TAHAPAN ALUR PENDAFTARAN &amp; BERKAS PERSYARATAN ({activeProdiObj.name})
               </div>
 
               {/* 7 STAGE CARDS */}
-              <div className="space-y-0.5">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                 {cards.filter(c => !isSkipped(c, activeProdi)).map(card => {
                   const prodiTerm = getProdiTerm(card, activeProdi);
                   let docsList = [];
@@ -595,23 +703,23 @@ export default function HomePage() {
                   const cleanNote = getCleanNote(card.note, activeProdi);
 
                   return (
-                    <div key={card.id} className="border border-slate-400 rounded p-1 text-[6.5pt] leading-tight bg-white">
-                      <div className="flex justify-between items-center mb-0.5">
-                        <strong className="font-bold text-slate-900 text-[7pt]">{card.title}</strong>
-                        <span className="bg-slate-100 text-slate-900 text-[6pt] font-bold px-1 py-0.1 rounded border border-slate-300">
+                    <div key={card.id} style={{ border: '1px solid #94a3b8', borderRadius: '4px', padding: '4px 6px', fontSize: '7pt', lineHeight: 1.2, backgroundColor: '#ffffff' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+                        <strong style={{ fontWeight: 'bold', color: '#0f172a', fontSize: '7.5pt' }}>{card.title}</strong>
+                        <span style={{ backgroundColor: '#f1f5f9', color: '#0f172a', fontSize: '6.5pt', fontWeight: 'bold', padding: '1px 5px', borderRadius: '3px', border: '1px solid #cbd5e1' }}>
                           Tahap {card.step_number} {prodiTerm ? `— ${prodiTerm}` : ''}
                         </span>
                       </div>
-                      <p className="text-slate-700 text-[6pt] mb-0.5">{card.description}</p>
-                      {cleanNote && <div className="text-blue-900 text-[5.5pt] italic mb-0.5 font-semibold">ℹ️ {cleanNote}</div>}
+                      <p style={{ color: '#334155', fontSize: '6.5pt', margin: '1px 0 2px 0' }}>{card.description}</p>
+                      {cleanNote && <div style={{ color: '#1e3a8a', fontSize: '6pt', fontStyle: 'italic', marginBottom: '2px', fontWeight: '600' }}>ℹ️ {cleanNote}</div>}
                       {docsList.length > 0 && (
-                        <div className="bg-slate-50 border border-slate-300 rounded p-0.5 text-[5.5pt] mt-0.5">
-                          <strong className="block text-slate-900 font-bold mb-0.5">
+                        <div style={{ backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '3px', padding: '3px 5px', fontSize: '6pt', marginTop: '2px' }}>
+                          <strong style={{ display: 'block', color: '#0f172a', fontWeight: 'bold', marginBottom: '2px' }}>
                             Berkas Persyaratan (PDF MENTORA - kpta.sisfoftudinus.my.id):
                           </strong>
-                          <div className="grid grid-cols-2 gap-x-2 gap-y-0.2">
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px 8px' }}>
                             {docsList.map((doc, di) => (
-                              <span key={di} className="truncate text-slate-800 font-medium">
+                              <span key={di} style={{ color: '#1e293b', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {di + 1}. {doc.title} {doc.sub ? `(${doc.sub})` : ''}
                               </span>
                             ))}
@@ -625,43 +733,43 @@ export default function HomePage() {
             </div>
 
             {/* FOOTER HALAMAN 1 */}
-            <div className="border-t border-black pt-0.5 text-[6.5pt] flex justify-between text-slate-700">
+            <div style={{ borderTop: '1px solid #000000', paddingTop: '2px', fontSize: '6.5pt', display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
               <span>Dokumen Resmi Alur Ujian Fakultas Teknik UDINUS</span>
               <span>Halaman 1 dari 2</span>
             </div>
           </div>
 
           {/* HALAMAN 2 */}
-          <div className="bg-white px-3 py-2 text-black w-[210mm] h-[280mm] max-h-[280mm] overflow-hidden box-border relative flex flex-col justify-between" style={{ pageBreakAfter: 'avoid', breakAfter: 'avoid' }}>
+          <div style={{ backgroundColor: '#ffffff', color: '#0f172a', width: '206mm', height: '276mm', maxHeight: '276mm', overflow: 'hidden', boxSizing: 'border-box', padding: '8px 10px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', pageBreakAfter: 'avoid', breakAfter: 'avoid' }}>
             <div>
               {/* KOP SURAT */}
-              <div className="border-b-2 border-black pb-1 mb-1.5">
-                <div className="flex items-center justify-between gap-3">
-                  <img src="/img/image.png" alt="Logo UDINUS" className="h-8 w-auto" />
-                  <div className="text-center flex-1">
-                    <h2 className="text-[9.5pt] font-bold leading-none m-0">UNIVERSITAS DIAN NUSWANTORO</h2>
-                    <h3 className="text-[8pt] font-bold leading-tight m-0">FAKULTAS TEKNIK</h3>
-                    <p className="text-[6pt] m-0 leading-tight">Jl. Nakula I No. 5-11 Semarang | Telp. (024) 3517261 | Website: ft.dinus.ac.id</p>
-                    <h4 className="text-[7pt] font-bold uppercase m-0 pt-0.5 border-t border-black inline-block">
+              <div style={{ borderBottom: '2px solid #000000', paddingBottom: '4px', marginBottom: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                  <img src="/img/image.png" alt="Logo UDINUS" style={{ height: '32px', width: 'auto' }} />
+                  <div style={{ textAlign: 'center', flex: 1 }}>
+                    <h2 style={{ fontSize: '10pt', fontWeight: 'bold', margin: 0, padding: 0, color: '#000000' }}>UNIVERSITAS DIAN NUSWANTORO</h2>
+                    <h3 style={{ fontSize: '8.5pt', fontWeight: 'bold', margin: 0, padding: 0, color: '#000000' }}>FAKULTAS TEKNIK</h3>
+                    <p style={{ fontSize: '6.5pt', margin: '1px 0', padding: 0, color: '#334155' }}>Jl. Nakula I No. 5-11 Semarang | Telp. (024) 3517261 | Website: ft.dinus.ac.id</p>
+                    <h4 style={{ fontSize: '7.5pt', fontWeight: 'bold', textTransform: 'uppercase', margin: 0, paddingTop: '1px', borderTop: '1px solid #000000', display: 'inline-block', color: '#000000' }}>
                       DIAGRAM ALUR LOGIKA UJIAN ({activeProdiObj.name})
                     </h4>
                   </div>
-                  <img src="/img/image-ft.png" alt="Logo FT UDINUS" className="h-8 w-auto" />
+                  <img src="/img/image-ft.png" alt="Logo FT UDINUS" style={{ height: '32px', width: 'auto' }} />
                 </div>
               </div>
 
-              <div className="text-center font-extrabold text-[7.5pt] mb-1 uppercase tracking-wider text-slate-900 border-b border-black pb-0.5">
+              <div style={{ textAlign: 'center', fontWeight: '800', fontSize: '8pt', marginBottom: '4px', textTransform: 'uppercase', color: '#0f172a', borderBottom: '1px solid #000000', paddingBottom: '2px' }}>
                 HALAMAN 2: DIAGRAM ALUR UJIAN ({activeProdiObj.name})
               </div>
 
-              {/* FLOWCHART (SCALED PROPORTIONALLY TO FIT PAGE 2) */}
-              <div className="transform scale-[0.76] origin-top -mb-20">
-                <AnsiFlowchart cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
+              {/* FLOWCHART PDF (PURE HEX STYLES) */}
+              <div style={{ marginTop: '4px' }}>
+                <PdfFlowchart cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
               </div>
             </div>
 
             {/* FOOTER HALAMAN 2 */}
-            <div className="border-t border-black pt-0.5 text-[6.5pt] flex justify-between text-slate-700">
+            <div style={{ borderTop: '1px solid #000000', paddingTop: '2px', fontSize: '6.5pt', display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
               <span>Dokumen Resmi Alur Ujian Fakultas Teknik UDINUS</span>
               <span>Halaman 2 dari 2</span>
             </div>
