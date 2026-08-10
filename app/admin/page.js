@@ -357,13 +357,14 @@ export default function AdminPage() {
 
         {/* Sticky Prodi Tabs */}
         <div className="sticky top-4 z-30 mb-6">
-          <div className="backdrop-blur-md bg-white/60 border border-white/60 rounded-2xl p-2 shadow-lg shadow-slate-900/5 flex gap-1.5 overflow-x-auto">
+          <div className="backdrop-blur-md bg-white/70 border border-white/60 rounded-2xl p-2 shadow-lg shadow-slate-900/5 flex gap-1.5 overflow-x-auto max-w-full no-scrollbar">
             {prodi.map(p => {
               const isActive = activeProdi === p.code;
               return (
-                <button key={p.code} onClick={() => setActiveProdi(p.code)} className={`inline-flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all shrink-0 ${isActive ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
+                <button key={p.code} onClick={() => setActiveProdi(p.code)} className={`inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 text-xs font-bold rounded-xl transition-all shrink-0 whitespace-nowrap ${isActive ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100/90 text-slate-700 hover:bg-slate-200'}`}>
                   <span className="w-2 h-2 rounded-full shrink-0" style={{ background: p.color || '#0f172a' }} />
-                  {p.name}
+                  <span className="hidden sm:inline">{p.name}</span>
+                  <span className="inline sm:hidden uppercase font-extrabold">{p.code}</span>
                 </button>
               );
             })}

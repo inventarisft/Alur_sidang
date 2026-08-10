@@ -344,21 +344,24 @@ export default function HomePage() {
 
         {/* Sticky Tab Bar */}
         <div className="sticky top-3 z-30 mb-8">
-          <div className="backdrop-blur-md bg-white/60 border border-white/60 rounded-2xl p-2.5 shadow-lg shadow-slate-900/5 flex items-center justify-between gap-3 flex-wrap">
-            <div className="flex items-center gap-2 flex-wrap">
+          <div className="backdrop-blur-md bg-white/70 border border-white/60 rounded-2xl p-2 sm:p-2.5 shadow-lg shadow-slate-900/5 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 overflow-x-auto max-w-full no-scrollbar py-0.5 px-0.5 shrink">
               {prodiList.map(p => {
                 const iconClass = p.icon || (p.code === 'te' ? 'fa-bolt' : p.code === 'tind' ? 'fa-industry' : p.code === 'tb' ? 'fa-heart-pulse' : 'fa-graduation-cap');
                 const isActive = activeProdi === p.code;
                 return (
-                  <button key={p.code} onClick={() => setActiveProdi(p.code)} className={`inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-xl transition-all ${isActive ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
+                  <button key={p.code} onClick={() => setActiveProdi(p.code)} className={`inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl transition-all shrink-0 whitespace-nowrap ${isActive ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100/90 text-slate-700 hover:bg-slate-200'}`}>
                     <i className={`fa-solid ${iconClass}`} style={{ color: isActive ? '#38bdf8' : (p.color || '#0f172a') }} />
-                    <span>{p.name}</span>
+                    <span className="hidden sm:inline">{p.name}</span>
+                    <span className="inline sm:hidden uppercase font-extrabold">{p.code}</span>
                   </button>
                 );
               })}
             </div>
-            <button onClick={handlePdfExport} className="no-print inline-flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-all ml-auto sm:ml-0">
-              <i className="fa-solid fa-file-pdf" /> <span>Unduh / Cetak PDF</span>
+            <button onClick={handlePdfExport} className="no-print inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-all shrink-0 whitespace-nowrap">
+              <i className="fa-solid fa-file-pdf" />
+              <span className="hidden sm:inline">Unduh / Cetak PDF</span>
+              <span className="inline sm:hidden">PDF</span>
             </button>
           </div>
         </div>

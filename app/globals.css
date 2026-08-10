@@ -53,3 +53,12 @@ body {
 .fc-annotation-parallelogram > * {
   transform: skewX(5deg);
 }
+
+/* Hide scrollbar for clean horizontal scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
