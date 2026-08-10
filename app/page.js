@@ -487,6 +487,30 @@ export default function HomePage() {
       const html2canvas = (await import('html2canvas')).default;
       const { jsPDF } = await import('jspdf');
 
+      // ====== Konversi semua <img> di PDF pages ke base64 inline ======
+      // agar tidak ada request network saat html2canvas render (mencegah blank karena CORS Vercel)
+      async function inlineImgs(el) {
+        const imgs = el.querySelectorAll('img');
+        await Promise.all(Array.from(imgs).map(img => new Promise(resolve => {
+          if (!img.src || img.src.startsWith('data:')) { resolve(); return; }
+          const canvas = document.createElement('canvas');
+          const imgObj = new Image();
+          imgObj.crossOrigin = 'anonymous';
+          imgObj.onload = () => {
+            canvas.width = imgObj.naturalWidth;
+            canvas.height = imgObj.naturalHeight;
+            canvas.getContext('2d').drawImage(imgObj, 0, 0);
+            try { img.src = canvas.toDataURL('image/png'); } catch (e) {}
+            resolve();
+          };
+          imgObj.onerror = () => { img.style.display = 'none'; resolve(); };
+          imgObj.src = img.src;
+        })));
+      }
+
+      await inlineImgs(page1El);
+      await inlineImgs(page2El);
+
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
       // Render Halaman 1
@@ -494,7 +518,8 @@ export default function HomePage() {
         scale: 2,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        imageTimeout: 0
       });
       const imgData1 = canvas1.toDataURL('image/jpeg', 0.98);
       pdf.addImage(imgData1, 'JPEG', 0, 0, 210, 297);
@@ -505,7 +530,8 @@ export default function HomePage() {
         scale: 2,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        imageTimeout: 0
       });
       const imgData2 = canvas2.toDataURL('image/jpeg', 0.98);
       pdf.addImage(imgData2, 'JPEG', 0, 0, 210, 297);
