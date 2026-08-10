@@ -471,63 +471,50 @@ export default function HomePage() {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
+  // ===== BULLETPROOF EXPORTER USING MODERN HTML2CANVAS & JSPDF =====
   async function handlePdfExport() {
     setPdfLoading(true);
     const prodiMatch = prodiList.find(p => p.code === activeProdi);
-    const pdfTarget = document.getElementById('pdf-export-container');
+    const page1El = document.getElementById('pdf-page-1');
+    const page2El = document.getElementById('pdf-page-2');
 
-    if (!pdfTarget) {
+    if (!page1El || !page2El) {
       setPdfLoading(false);
       return;
     }
 
-    const origStyle = pdfTarget.getAttribute('style') || '';
-
     try {
-      // Pindahkan sementara container ke posisi utama (0,0) agar html2canvas merender piksel secara sempurna
-      pdfTarget.style.position = 'absolute';
-      pdfTarget.style.left = '0px';
-      pdfTarget.style.top = '0px';
-      pdfTarget.style.zIndex = '99999';
-      pdfTarget.style.backgroundColor = '#ffffff';
-      pdfTarget.style.opacity = '1';
-      pdfTarget.style.display = 'block';
+      const html2canvas = (await import('html2canvas')).default;
+      const { jsPDF } = await import('jspdf');
 
-      // Load html2pdf script otomatis dari CDN jika belum dimuat
-      if (typeof window !== 'undefined' && !window.html2pdf) {
-        await new Promise((resolve, reject) => {
-          const script = document.createElement('script');
-          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-          script.onload = resolve;
-          script.onerror = () => reject(new Error('Gagal memuat pustaka PDF'));
-          document.head.appendChild(script);
-        });
-      }
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-      if (window.html2pdf) {
-        const opt = {
-          margin:       [2, 3, 2, 3], // mm (zero wasted margin)
-          filename:     `Alur_Ujian_${(prodiMatch?.code || activeProdi).toUpperCase()}_UDINUS.pdf`,
-          image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            logging: false,
-            scrollY: 0,
-            scrollX: 0
-          },
-          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-        await window.html2pdf().set(opt).from(pdfTarget).save();
-      } else {
-        window.print();
-      }
+      // Render Halaman 1
+      const canvas1 = await html2canvas(page1El, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      });
+      const imgData1 = canvas1.toDataURL('image/jpeg', 0.98);
+      pdf.addImage(imgData1, 'JPEG', 0, 0, 210, 297);
+
+      // Render Halaman 2
+      pdf.addPage();
+      const canvas2 = await html2canvas(page2El, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      });
+      const imgData2 = canvas2.toDataURL('image/jpeg', 0.98);
+      pdf.addImage(imgData2, 'JPEG', 0, 0, 210, 297);
+
+      pdf.save(`Alur_Ujian_${(prodiMatch?.code || activeProdi).toUpperCase()}_UDINUS.pdf`);
     } catch (e) {
-      console.error('html2pdf error:', e);
-      window.print();
+      console.error('PDF export error:', e);
+      alert('Gagal mengekspor PDF: ' + e.message);
     } finally {
-      pdfTarget.setAttribute('style', origStyle);
       setPdfLoading(false);
     }
   }
@@ -680,10 +667,10 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* PDF DIRECT EXPORTER (OFFSCREEN RENDERED - ZERO BLANK PAGES - EXACT 2 PAGES A4) */}
-        <div id="pdf-export-container" style={{ position: 'fixed', left: '-9999px', top: '0', backgroundColor: '#ffffff', color: '#0f172a', width: '206mm', zIndex: -9999 }}>
+        {/* PDF DIRECT EXPORTER (OFFSCREEN FIXED POSITIONS - 2 PAGES A4) */}
+        <div style={{ position: 'fixed', left: '-9999px', top: '0px', width: '210mm', opacity: 1, zIndex: -9999 }}>
           {/* HALAMAN 1 */}
-          <div style={{ backgroundColor: '#ffffff', color: '#0f172a', width: '206mm', height: '276mm', maxHeight: '276mm', overflow: 'hidden', boxSizing: 'border-box', padding: '8px 10px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', pageBreakAfter: 'always', breakAfter: 'page' }}>
+          <div id="pdf-page-1" style={{ backgroundColor: '#ffffff', color: '#0f172a', width: '210mm', height: '297mm', boxSizing: 'border-box', padding: '10px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
               {/* KOP SURAT */}
               <div style={{ borderBottom: '2px solid #000000', paddingBottom: '4px', marginBottom: '6px' }}>
@@ -706,7 +693,7 @@ export default function HomePage() {
               </div>
 
               {/* 7 STAGE CARDS */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {cards.filter(c => !isSkipped(c, activeProdi)).map(card => {
                   const prodiTerm = getProdiTerm(card, activeProdi);
                   let docsList = [];
@@ -714,7 +701,7 @@ export default function HomePage() {
                   const cleanNote = getCleanNote(card.note, activeProdi);
 
                   return (
-                    <div key={card.id} style={{ border: '1px solid #94a3b8', borderRadius: '4px', padding: '4px 6px', fontSize: '7pt', lineHeight: 1.2, backgroundColor: '#ffffff' }}>
+                    <div key={card.id} style={{ border: '1px solid #94a3b8', borderRadius: '4px', padding: '5px 8px', fontSize: '7pt', lineHeight: 1.2, backgroundColor: '#ffffff' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
                         <strong style={{ fontWeight: 'bold', color: '#0f172a', fontSize: '7.5pt' }}>{card.title}</strong>
                         <span style={{ backgroundColor: '#f1f5f9', color: '#0f172a', fontSize: '6.5pt', fontWeight: 'bold', padding: '1px 5px', borderRadius: '3px', border: '1px solid #cbd5e1' }}>
@@ -724,7 +711,7 @@ export default function HomePage() {
                       <p style={{ color: '#334155', fontSize: '6.5pt', margin: '1px 0 2px 0' }}>{card.description}</p>
                       {cleanNote && <div style={{ color: '#1e3a8a', fontSize: '6pt', fontStyle: 'italic', marginBottom: '2px', fontWeight: '600' }}>ℹ️ {cleanNote}</div>}
                       {docsList.length > 0 && (
-                        <div style={{ backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '3px', padding: '3px 5px', fontSize: '6pt', marginTop: '2px' }}>
+                        <div style={{ backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '3px', padding: '4px 6px', fontSize: '6pt', marginTop: '2px' }}>
                           <strong style={{ display: 'block', color: '#0f172a', fontWeight: 'bold', marginBottom: '2px' }}>
                             Berkas Persyaratan (PDF MENTORA - kpta.sisfoftudinus.my.id):
                           </strong>
@@ -744,14 +731,14 @@ export default function HomePage() {
             </div>
 
             {/* FOOTER HALAMAN 1 */}
-            <div style={{ borderTop: '1px solid #000000', paddingTop: '2px', fontSize: '6.5pt', display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
+            <div style={{ borderTop: '1px solid #000000', paddingTop: '3px', fontSize: '6.5pt', display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
               <span>Dokumen Resmi Alur Ujian Fakultas Teknik UDINUS</span>
               <span>Halaman 1 dari 2</span>
             </div>
           </div>
 
           {/* HALAMAN 2 */}
-          <div style={{ backgroundColor: '#ffffff', color: '#0f172a', width: '206mm', height: '276mm', maxHeight: '276mm', overflow: 'hidden', boxSizing: 'border-box', padding: '8px 10px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', pageBreakAfter: 'avoid', breakAfter: 'avoid' }}>
+          <div id="pdf-page-2" style={{ backgroundColor: '#ffffff', color: '#0f172a', width: '210mm', height: '297mm', boxSizing: 'border-box', padding: '10px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
               {/* KOP SURAT */}
               <div style={{ borderBottom: '2px solid #000000', paddingBottom: '4px', marginBottom: '6px' }}>
@@ -769,18 +756,18 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div style={{ textAlign: 'center', fontWeight: '800', fontSize: '8pt', marginBottom: '4px', textTransform: 'uppercase', color: '#0f172a', borderBottom: '1px solid #000000', paddingBottom: '2px' }}>
+              <div style={{ textAlign: 'center', fontWeight: '800', fontSize: '8pt', marginBottom: '6px', textTransform: 'uppercase', color: '#0f172a', borderBottom: '1px solid #000000', paddingBottom: '2px' }}>
                 HALAMAN 2: DIAGRAM ALUR UJIAN ({activeProdiObj.name})
               </div>
 
               {/* FLOWCHART PDF (PURE HEX STYLES) */}
-              <div style={{ marginTop: '4px' }}>
+              <div style={{ marginTop: '6px' }}>
                 <PdfFlowchart cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
               </div>
             </div>
 
             {/* FOOTER HALAMAN 2 */}
-            <div style={{ borderTop: '1px solid #000000', paddingTop: '2px', fontSize: '6.5pt', display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
+            <div style={{ borderTop: '1px solid #000000', paddingTop: '3px', fontSize: '6.5pt', display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
               <span>Dokumen Resmi Alur Ujian Fakultas Teknik UDINUS</span>
               <span>Halaman 2 dari 2</span>
             </div>
