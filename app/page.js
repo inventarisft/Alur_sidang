@@ -40,8 +40,8 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
   });
 
   return (
-    <div className="flex flex-col items-center gap-2 p-2 sm:p-4 w-full max-w-4xl mx-auto overflow-hidden">
-      <div className="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 text-center flex items-center justify-center gap-2 no-print">
+    <div className="flex flex-col items-center gap-1.5 sm:gap-2 p-1 sm:p-4 w-full max-w-4xl mx-auto overflow-hidden">
+      <div className="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider mb-2 text-center flex items-center justify-center gap-2 no-print">
         <i className="fa-solid fa-diagram-project text-blue-600" /> Skema Alur: {prodiObj.name}
       </div>
       {mainCards.map((c, idx) => {
@@ -56,14 +56,14 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
         const labelContent = (
           <span className="font-bold">
             {c.title}
-            {prodiTerm && <span className="text-blue-600 font-semibold block text-[11px] sm:text-xs mt-0.5">({prodiTerm})</span>}
+            {prodiTerm && <span className="text-blue-600 font-semibold block text-[10px] sm:text-xs mt-0.5">({prodiTerm})</span>}
           </span>
         );
 
         const annotationSlot = annotations.length > 0 ? (
-          <div className="flex flex-col gap-2 w-full sm:w-56 shrink-0 pt-1">
+          <div className="flex flex-col gap-1.5 w-full sm:w-56 shrink-0 pt-1">
             {annotations.map((n, ni) => (
-              <div key={ni} className="fc-annotation-parallelogram bg-emerald-50 border border-emerald-400 border-l-4 border-l-emerald-600 rounded-lg p-2 text-xs text-emerald-950 font-semibold flex items-start gap-2 shadow-sm">
+              <div key={ni} className="fc-annotation-parallelogram bg-emerald-50 border border-emerald-400 border-l-4 border-l-emerald-600 rounded-lg p-2 text-xs text-emerald-950 font-semibold flex items-start gap-2 shadow-xs">
                 <i className="fa-solid fa-file-lines text-emerald-600 shrink-0 mt-0.5" />
                 <div className="break-words"><strong className="block text-emerald-950">{n.title}</strong>{n.note || n.description}</div>
               </div>
@@ -73,43 +73,43 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
 
         return (
           <div key={c.id} className="w-full flex flex-col items-center">
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 w-full max-w-2xl justify-center">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3 w-full max-w-2xl justify-center">
               {isTerminal ? (
-                <div className={`px-5 py-2 rounded-full font-bold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 shadow-md shrink-0 text-center max-w-full ${isFirst ? 'bg-slate-900 text-slate-50' : 'bg-emerald-800 text-emerald-50'}`}>
+                <div className={`px-4 py-2 rounded-full font-bold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 shadow-sm shrink-0 text-center max-w-full ${isFirst ? 'bg-slate-900 text-slate-50' : 'bg-emerald-800 text-emerald-50'}`}>
                   <i className={`fa-solid ${isFirst ? 'fa-circle-play text-emerald-400' : 'fa-flag-checkered text-amber-300'}`} /> {labelContent}
                 </div>
               ) : isDecision ? (
                 <div className="flex flex-col items-center w-full max-w-md">
-                  <div className="w-28 h-28 sm:w-36 sm:h-36 bg-amber-50 border-2 border-amber-600 rotate-45 flex items-center justify-center my-2 shadow-sm shrink-0">
-                    <div className="-rotate-45 text-center text-[10px] sm:text-xs font-extrabold text-amber-950 p-2 leading-tight max-w-[90px] sm:max-w-[100px] break-words">
+                  <div className="w-24 h-24 sm:w-36 sm:h-36 bg-amber-50 border-2 border-amber-600 rotate-45 flex items-center justify-center my-1.5 sm:my-2 shadow-xs shrink-0">
+                    <div className="-rotate-45 text-center text-[9px] sm:text-xs font-extrabold text-amber-950 p-1.5 leading-tight max-w-[80px] sm:max-w-[100px] break-words">
                       {labelContent}
                     </div>
                   </div>
-                  <div className="flex justify-between items-start w-full max-w-xs mt-1 gap-2">
+                  <div className="flex justify-between items-start w-full max-w-xs mt-0.5 gap-2">
                     <div className="flex flex-col items-center flex-1 min-w-0">
-                      <span className="text-[10px] sm:text-[11px] font-extrabold text-red-700 block mb-0.5">TIDAK / Gagal</span>
-                      <div className="flex flex-col items-center gap-1 w-full">
-                        <i className="fa-solid fa-arrow-up text-red-600 text-sm" />
-                        <div className="bg-red-50 border border-dashed border-red-300 rounded-lg p-1.5 text-[9px] sm:text-[11px] font-bold text-red-900 text-center leading-tight w-full break-words">
+                      <span className="text-[9px] sm:text-[11px] font-extrabold text-red-700 block mb-0.5">TIDAK / Gagal</span>
+                      <div className="flex flex-col items-center gap-0.5 w-full">
+                        <i className="fa-solid fa-arrow-up text-red-600 text-xs sm:text-sm" />
+                        <div className="bg-red-50 border border-dashed border-red-300 rounded-lg p-1 text-[8.5px] sm:text-[11px] font-bold text-red-900 text-center leading-tight w-full break-words">
                           Kembali ke:<br />{prevCard ? prevCard.title : 'Proses Sebelumnya'}
                         </div>
                       </div>
                     </div>
                     <div className="flex flex-col items-center flex-1 min-w-0">
-                      <span className="text-[10px] sm:text-[11px] font-extrabold text-emerald-800 block mb-0.5">YA / Lulus</span>
-                      <i className="fa-solid fa-arrow-down text-emerald-600 text-base" />
+                      <span className="text-[9px] sm:text-[11px] font-extrabold text-emerald-800 block mb-0.5">YA / Lulus</span>
+                      <i className="fa-solid fa-arrow-down text-emerald-600 text-sm sm:text-base" />
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="w-full max-w-md bg-white border-2 border-slate-900 p-3 rounded-xl text-center shadow-sm">
+                <div className="w-full max-w-md bg-white border-2 border-slate-900 p-2.5 sm:p-3 rounded-xl text-center shadow-xs">
                   <div className="text-xs sm:text-sm font-bold text-slate-900">{labelContent}</div>
-                  {c.description && <div className="text-[11px] sm:text-xs text-slate-600 mt-1 font-medium">{c.description}</div>}
+                  {c.description && <div className="text-[10px] sm:text-xs text-slate-600 mt-0.5 font-medium">{c.description}</div>}
                 </div>
               )}
               {annotationSlot}
             </div>
-            {!isLast && <div className="text-slate-700 text-sm sm:text-base py-0.5"><i className="fa-solid fa-arrow-down" /></div>}
+            {!isLast && <div className="text-slate-700 text-xs sm:text-base py-0.5"><i className="fa-solid fa-arrow-down" /></div>}
           </div>
         );
       })}
@@ -281,11 +281,11 @@ function PrintPage1Timeline({ cards, prodiList, activeProdi }) {
         </div>
       </div>
 
-      <div className="text-center font-extrabold text-[9.5pt] mb-2 uppercase tracking-wider text-slate-900 border-b border-black pb-1">
+      <div className="text-center font-extrabold text-[9pt] mb-1.5 uppercase tracking-wider text-slate-900 border-b border-black pb-0.5">
         HALAMAN 1: TAHAPAN ALUR PENDAFTARAN &amp; BERKAS PERSYARATAN ({prodiObj.name})
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-1">
         {validCards.map(card => {
           const prodiTerm = getProdiTerm(card, activeProdi);
           let docsList = [];
@@ -293,17 +293,17 @@ function PrintPage1Timeline({ cards, prodiList, activeProdi }) {
           const cleanNote = getCleanNote(card.note, activeProdi);
 
           return (
-            <div key={card.id} className="border border-slate-400 rounded p-2 text-[8.5pt] leading-tight bg-white">
+            <div key={card.id} className="border border-slate-400 rounded p-1.5 text-[8pt] leading-tight bg-white">
               <div className="flex justify-between items-center mb-0.5">
-                <strong className="font-bold text-slate-900 text-[9pt]">{card.title}</strong>
-                <span className="bg-slate-100 text-slate-900 text-[7.5pt] font-bold px-1.5 py-0.5 rounded border border-slate-300">
+                <strong className="font-bold text-slate-900 text-[8.5pt]">{card.title}</strong>
+                <span className="bg-slate-100 text-slate-900 text-[7.5pt] font-bold px-1.5 py-0.2 rounded border border-slate-300">
                   Tahap {card.step_number} {prodiTerm ? `— ${prodiTerm}` : ''}
                 </span>
               </div>
-              <p className="text-slate-700 text-[8pt] mb-1">{card.description}</p>
-              {cleanNote && <div className="text-blue-900 text-[7.5pt] italic mb-1 font-semibold">ℹ️ {cleanNote}</div>}
+              <p className="text-slate-700 text-[7.5pt] mb-0.5">{card.description}</p>
+              {cleanNote && <div className="text-blue-900 text-[7pt] italic mb-0.5 font-semibold">ℹ️ {cleanNote}</div>}
               {docsList.length > 0 && (
-                <div className="bg-slate-50 border border-slate-300 rounded p-1.5 text-[7pt]">
+                <div className="bg-slate-50 border border-slate-300 rounded p-1 text-[6.5pt] mt-0.5">
                   <strong className="block text-slate-900 font-bold mb-0.5">
                     Berkas Persyaratan (PDF di GDRIVE MENTORA - kpta.sisfoftudinus.my.id):
                   </strong>
@@ -342,7 +342,7 @@ function PrintPage2Flowchart({ cards, prodiList, activeProdi }) {
         </div>
       </div>
 
-      <div className="text-center font-extrabold text-[9.5pt] mb-2 uppercase tracking-wider text-slate-900 border-b border-black pb-1">
+      <div className="text-center font-extrabold text-[9pt] mb-1.5 uppercase tracking-wider text-slate-900 border-b border-black pb-0.5">
         HALAMAN 2: DIAGRAM ALUR UJIAN ({prodiObj.name})
       </div>
 
@@ -437,7 +437,7 @@ export default function HomePage() {
   return (
     <>
       <div className="max-w-5xl mx-auto px-4 py-6 sm:py-10">
-        <header className="mb-6 sm:mb-10">
+        <header className="no-print mb-6 sm:mb-10">
           <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
             <img src="/img/image.png" alt="Logo UDINUS" className="h-12 sm:h-16 w-auto drop-shadow-md" />
             <div className="text-center flex-1 min-w-[200px]">
@@ -454,7 +454,7 @@ export default function HomePage() {
         </header>
 
         {/* Sticky Tab Bar */}
-        <div className="sticky top-3 z-30 mb-8">
+        <div className="no-print sticky top-3 z-30 mb-8">
           <div className="backdrop-blur-md bg-white/70 border border-white/60 rounded-2xl p-2 sm:p-2.5 shadow-lg shadow-slate-900/5 flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 overflow-x-auto max-w-full no-scrollbar py-0.5 px-0.5 shrink">
               {prodiList.map(p => {

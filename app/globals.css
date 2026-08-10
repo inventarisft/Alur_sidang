@@ -22,7 +22,7 @@ body {
 
 @page {
   size: A4 portrait;
-  margin: 8mm 10mm;
+  margin: 6mm 8mm;
 }
 
 @media print {
@@ -33,7 +33,7 @@ body {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-  .no-print {
+  header, .sticky, nav, .no-print {
     display: none !important;
   }
   .pdf-page-1 {
@@ -48,9 +48,9 @@ body {
   }
   .print-header {
     display: block !important;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     border-bottom: 2px solid #000;
-    padding-bottom: 6px;
+    padding-bottom: 4px;
   }
   .print-kop-wrapper {
     display: flex;
@@ -59,7 +59,7 @@ body {
     gap: 10px;
   }
   .print-logo-left, .print-logo-right {
-    height: 44px;
+    height: 40px;
     width: auto;
   }
   .print-kop-text {
@@ -67,25 +67,25 @@ body {
     flex: 1;
   }
   .print-kop-text h2 {
-    font-size: 11pt;
+    font-size: 10.5pt;
     font-weight: bold;
     margin: 0;
   }
   .print-kop-text h3 {
-    font-size: 9.5pt;
+    font-size: 9pt;
     font-weight: bold;
     margin: 0;
   }
   .print-kop-text p {
-    font-size: 7.5pt;
-    margin: 1px 0 3px 0;
+    font-size: 7pt;
+    margin: 1px 0 2px 0;
   }
   .print-kop-text h4 {
-    font-size: 8.5pt;
+    font-size: 8pt;
     font-weight: bold;
     text-transform: uppercase;
     border-top: 1px solid #000;
-    padding-top: 2px;
+    padding-top: 1px;
     display: inline-block;
     margin: 0;
   }
@@ -97,7 +97,7 @@ body {
     left: 0;
     right: 0;
     background: #fff;
-    padding-top: 4px;
+    padding-top: 2px;
   }
 
   .ansi-flowchart-wrapper {
