@@ -12,7 +12,6 @@ function getProdiTerm(card, prodiCode) {
 
 function isSkipped(card, prodiCode) {
   if (card.skip_tind && prodiCode === 'tind') return true;
-  if ((card.title || '').toLowerCase().includes('informatika') && prodiCode !== 'ti') return true;
   return false;
 }
 
