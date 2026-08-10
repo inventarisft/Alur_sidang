@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { PdfExportDocument, triggerPdfExport } from '../components/PdfExporter';
 
 const API = '/api/stages';
 
@@ -23,113 +24,6 @@ function getCleanNote(note, activeProdi) {
     return '';
   }
   return note;
-}
-
-// ===== FLOWCHART FOR PDF (EXPLICIT HEX STYLES - ZERO OKLCH/LAB ERRORS) =====
-function PdfFlowchart({ cards, prodiList, activeProdi }) {
-  const prodiObj = prodiList.find(p => p.code === activeProdi) || { name: activeProdi.toUpperCase() };
-  const isNote = c => c.shape === 'note';
-  const noteCards = cards.filter(c => isNote(c) && !isSkipped(c, activeProdi));
-  const mainCards = cards.filter(c => !isSkipped(c, activeProdi) && !isNote(c));
-
-  const noteMap = {};
-  noteCards.forEach(n => {
-    let key = n.step_number;
-    if (!mainCards.some(mc => mc.step_number === key) && key > 1) {
-      key = key - 1;
-    }
-    if (!noteMap[key]) noteMap[key] = [];
-    noteMap[key].push(n);
-  });
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', width: '100%', maxWidth: '620px', margin: '0 auto' }}>
-      {mainCards.map((c, idx) => {
-        const isFirst = idx === 0;
-        const isLast = idx === mainCards.length - 1;
-        const isTerminal = c.shape === 'terminal' || isFirst || isLast;
-        const isDecision = c.shape === 'decision';
-        const prodiTerm = getProdiTerm(c, activeProdi);
-        const cleanNote = getCleanNote(c.note, activeProdi);
-        const annotations = (noteMap[c.step_number] || []);
-        const prevCard = idx > 0 ? mainCards[idx - 1] : null;
-
-        const getLabelContent = (termColor = "#2563eb") => (
-          <span style={{ fontWeight: 'bold' }}>
-            {c.title}
-            {prodiTerm && <span style={{ color: termColor, fontWeight: '600', display: 'block', fontSize: '8.5px', marginTop: '1px' }}>({prodiTerm})</span>}
-          </span>
-        );
-
-        const annotationSlot = annotations.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '160px', flexShrink: 0, paddingTop: '2px' }}>
-            {annotations.map((n, ni) => (
-              <div key={ni} style={{ backgroundColor: '#ecfdf5', border: '1px solid #34d399', borderLeft: '4px solid #059669', borderRadius: '6px', padding: '5px', fontSize: '8.5px', color: '#064e3b', fontWeight: '600' }}>
-                <strong style={{ display: 'block', color: '#064e3b' }}>{n.title}</strong>
-                <span style={{ fontSize: '8px', fontWeight: '500', display: 'block' }}>{n.description}</span>
-                {n.note && <span style={{ fontSize: '7.5px', fontStyle: 'italic', display: 'block', marginTop: '1px' }}>ℹ️ {n.note}</span>}
-              </div>
-            ))}
-          </div>
-        ) : null;
-
-        return (
-          <div key={c.id} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', width: '100%', justifyContent: 'center' }}>
-              {isTerminal ? (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div style={{ padding: '5px 14px', borderRadius: '9999px', fontWeight: 'bold', fontSize: '9.5px', backgroundColor: isFirst ? '#0f172a' : '#065f46', color: '#ffffff', textAlign: 'center' }}>
-                    {getLabelContent(isFirst ? "#38bdf8" : "#fef08a")}
-                  </div>
-                  {cleanNote && (
-                    <div style={{ marginTop: '2px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', color: '#1e3a8a', fontSize: '7.5px', fontWeight: '600', padding: '2px 6px', borderRadius: '4px', textAlign: 'center', maxWidth: '240px' }}>
-                      ℹ️ {cleanNote}
-                    </div>
-                  )}
-                </div>
-              ) : isDecision ? (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '450px', position: 'relative' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', position: 'relative', minHeight: '110px' }}>
-                    {/* CABANG KIRI: TIDAK / GAGAL */}
-                    <div style={{ position: 'absolute', left: '0px', top: '50%', transform: 'translateY(-50%)', backgroundColor: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '6px', padding: '5px', color: '#7f1d1d', fontSize: '8px', fontWeight: 'bold', maxWidth: '135px', zIndex: 10 }}>
-                      <span style={{ display: 'block', color: '#b91c1c', fontWeight: '800', textTransform: 'uppercase' }}>TIDAK / Gagal</span>
-                      <span style={{ fontSize: '7.5px', color: '#7f1d1d' }}>Ulang: {prevCard ? prevCard.title : 'Proses Sebelumnya'}</span>
-                    </div>
-
-                    {/* BELAH KETUPAT */}
-                    <div style={{ width: '90px', height: '90px', backgroundColor: '#fffbeb', border: '2px solid #d97706', transform: 'rotate(45deg)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '8px 0' }}>
-                      <div style={{ transform: 'rotate(-45deg)', textAlign: 'center', fontSize: '8px', fontWeight: '800', color: '#78350f', padding: '3px', maxWidth: '70px' }}>
-                        {getLabelContent("#b45309")}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* CABANG BAWAH: YA / LULUS */}
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#059669', marginTop: '-4px' }}>
-                    <div style={{ backgroundColor: '#ecfdf5', border: '1px solid #6ee7b7', borderRadius: '9999px', padding: '1px 8px', color: '#065f46', fontSize: '7.5px', fontWeight: '800' }}>
-                      YA / Lulus ▼
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div style={{ width: '100%', maxWidth: '320px', backgroundColor: '#ffffff', border: '2px solid #0f172a', padding: '6px', borderRadius: '8px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '9.5px', fontWeight: 'bold', color: '#0f172a' }}>{getLabelContent()}</div>
-                  {c.description && <div style={{ fontSize: '8px', color: '#475569', marginTop: '2px', fontWeight: '500' }}>{c.description}</div>}
-                  {cleanNote && (
-                    <div style={{ marginTop: '3px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', color: '#1e3a8a', fontSize: '7.5px', fontWeight: '600', padding: '2px', borderRadius: '4px' }}>
-                      ℹ️ {cleanNote}
-                    </div>
-                  )}
-                </div>
-              )}
-              {annotationSlot}
-            </div>
-            {!isLast && <div style={{ color: '#334155', fontSize: '10px', padding: '1px 0' }}>↓</div>}
-          </div>
-        );
-      })}
-    </div>
-  );
 }
 
 // ===== FLOWCHART FOR WEB INTERFACE =====
@@ -471,81 +365,12 @@ export default function HomePage() {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  // ===== BULLETPROOF EXPORTER USING MODERN HTML2CANVAS & JSPDF =====
-  async function handlePdfExport() {
-    setPdfLoading(true);
-    const prodiMatch = prodiList.find(p => p.code === activeProdi);
-    const page1El = document.getElementById('pdf-page-1');
-    const page2El = document.getElementById('pdf-page-2');
-
-    if (!page1El || !page2El) {
-      setPdfLoading(false);
-      return;
-    }
-
-    try {
-      const html2canvas = (await import('html2canvas')).default;
-      const { jsPDF } = await import('jspdf');
-
-      // ====== Konversi semua <img> di PDF pages ke base64 inline ======
-      // agar tidak ada request network saat html2canvas render (mencegah blank karena CORS Vercel)
-      async function inlineImgs(el) {
-        const imgs = el.querySelectorAll('img');
-        await Promise.all(Array.from(imgs).map(img => new Promise(resolve => {
-          if (!img.src || img.src.startsWith('data:')) { resolve(); return; }
-          const canvas = document.createElement('canvas');
-          const imgObj = new Image();
-          imgObj.crossOrigin = 'anonymous';
-          imgObj.onload = () => {
-            canvas.width = imgObj.naturalWidth;
-            canvas.height = imgObj.naturalHeight;
-            canvas.getContext('2d').drawImage(imgObj, 0, 0);
-            try { img.src = canvas.toDataURL('image/png'); } catch (e) {}
-            resolve();
-          };
-          imgObj.onerror = () => { img.style.display = 'none'; resolve(); };
-          imgObj.src = img.src;
-        })));
-      }
-
-      await inlineImgs(page1El);
-      await inlineImgs(page2El);
-
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-      // Render Halaman 1
-      const canvas1 = await html2canvas(page1El, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        imageTimeout: 0
-      });
-      const imgData1 = canvas1.toDataURL('image/jpeg', 0.98);
-      pdf.addImage(imgData1, 'JPEG', 0, 0, 210, 297);
-
-      // Render Halaman 2
-      pdf.addPage();
-      const canvas2 = await html2canvas(page2El, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        imageTimeout: 0
-      });
-      const imgData2 = canvas2.toDataURL('image/jpeg', 0.98);
-      pdf.addImage(imgData2, 'JPEG', 0, 0, 210, 297);
-
-      pdf.save(`Alur_Ujian_${(prodiMatch?.code || activeProdi).toUpperCase()}_UDINUS.pdf`);
-    } catch (e) {
-      console.error('PDF export error:', e);
-      alert('Gagal mengekspor PDF: ' + e.message);
-    } finally {
-      setPdfLoading(false);
-    }
-  }
+  const handlePdfClick = () => {
+    triggerPdfExport({ cards, prodiList, activeProdi, setPdfLoading });
+  };
 
   const activeProdiObj = prodiList.find(p => p.code === activeProdi) || { name: activeProdi.toUpperCase() };
+  const isDataReady = !loading && cards.length > 0 && prodiList.length > 0;
 
   return (
     <>
@@ -570,24 +395,40 @@ export default function HomePage() {
         <div className="no-print sticky top-3 z-30 mb-8">
           <div className="backdrop-blur-md bg-white/70 border border-white/60 rounded-2xl p-2 sm:p-2.5 shadow-lg shadow-slate-900/5 flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 overflow-x-auto max-w-full no-scrollbar py-0.5 px-0.5 shrink">
-              {prodiList.map(p => {
-                const iconClass = p.icon || (p.code === 'te' ? 'fa-bolt' : p.code === 'tind' ? 'fa-industry' : p.code === 'tb' ? 'fa-heart-pulse' : 'fa-graduation-cap');
-                const isActive = activeProdi === p.code;
-                return (
-                  <button key={p.code} onClick={() => setActiveProdi(p.code)} className={`inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl transition-all shrink-0 whitespace-nowrap ${isActive ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100/90 text-slate-700 hover:bg-slate-200'}`}>
-                    <i className={`fa-solid ${iconClass}`} style={{ color: isActive ? '#38bdf8' : (p.color || '#0f172a') }} />
-                    <span className="hidden sm:inline">{p.name}</span>
-                    <span className="inline sm:hidden uppercase font-extrabold">{p.code}</span>
-                  </button>
-                );
-              })}
+              {loading ? (
+                <div className="flex items-center gap-2 animate-pulse">
+                  <div className="h-8 w-24 bg-slate-200 rounded-xl" />
+                  <div className="h-8 w-24 bg-slate-200 rounded-xl" />
+                </div>
+              ) : (
+                prodiList.map(p => {
+                  const iconClass = p.icon || (p.code === 'te' ? 'fa-bolt' : p.code === 'tind' ? 'fa-industry' : p.code === 'tb' ? 'fa-heart-pulse' : 'fa-graduation-cap');
+                  const isActive = activeProdi === p.code;
+                  return (
+                    <button key={p.code} onClick={() => setActiveProdi(p.code)} className={`inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl transition-all shrink-0 whitespace-nowrap ${isActive ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100/90 text-slate-700 hover:bg-slate-200'}`}>
+                      <i className={`fa-solid ${iconClass}`} style={{ color: isActive ? '#38bdf8' : (p.color || '#0f172a') }} />
+                      <span className="hidden sm:inline">{p.name}</span>
+                      <span className="inline sm:hidden uppercase font-extrabold">{p.code}</span>
+                    </button>
+                  );
+                })
+              )}
             </div>
+
+            {/* SKELETON / PROTECTED PDF DOWNLOAD BUTTON */}
             <button
-              onClick={handlePdfExport}
-              disabled={pdfLoading}
-              className="no-print inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white shadow-md transition-all shrink-0 whitespace-nowrap cursor-pointer disabled:opacity-50"
+              onClick={handlePdfClick}
+              disabled={!isDataReady || pdfLoading}
+              className={`no-print inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 text-xs font-bold rounded-xl shadow-md transition-all shrink-0 whitespace-nowrap ${!isDataReady || pdfLoading ? 'bg-slate-300 text-slate-500 cursor-not-allowed opacity-75' : 'bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white cursor-pointer'}`}
+              title={!isDataReady ? 'Silakan tunggu hingga data selesai dimuat' : 'Unduh PDF (2 Halaman)'}
             >
-              {pdfLoading ? (
+              {!isDataReady ? (
+                <>
+                  <i className="fa-solid fa-spinner animate-spin text-slate-500" />
+                  <span className="hidden sm:inline">Memuat Data...</span>
+                  <span className="inline sm:hidden">...</span>
+                </>
+              ) : pdfLoading ? (
                 <>
                   <i className="fa-solid fa-spinner animate-spin" />
                   <span>Mengunduh...</span>
@@ -693,112 +534,8 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* PDF DIRECT EXPORTER (OFFSCREEN FIXED POSITIONS - 2 PAGES A4) */}
-        <div style={{ position: 'fixed', left: '-9999px', top: '0px', width: '210mm', opacity: 1, zIndex: -9999 }}>
-          {/* HALAMAN 1 */}
-          <div id="pdf-page-1" style={{ backgroundColor: '#ffffff', color: '#0f172a', width: '210mm', height: '297mm', boxSizing: 'border-box', padding: '10px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              {/* KOP SURAT */}
-              <div style={{ borderBottom: '2px solid #000000', paddingBottom: '4px', marginBottom: '6px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                  <img src="/img/image.png" alt="Logo UDINUS" style={{ height: '32px', width: 'auto' }} />
-                  <div style={{ textAlign: 'center', flex: 1 }}>
-                    <h2 style={{ fontSize: '10pt', fontWeight: 'bold', margin: 0, padding: 0, color: '#000000' }}>UNIVERSITAS DIAN NUSWANTORO</h2>
-                    <h3 style={{ fontSize: '8.5pt', fontWeight: 'bold', margin: 0, padding: 0, color: '#000000' }}>FAKULTAS TEKNIK</h3>
-                    <p style={{ fontSize: '6.5pt', margin: '1px 0', padding: 0, color: '#334155' }}>Jl. Nakula I No. 5-11 Semarang | Telp. (024) 3517261 | Website: ft.dinus.ac.id</p>
-                    <h4 style={{ fontSize: '7.5pt', fontWeight: 'bold', textTransform: 'uppercase', margin: 0, paddingTop: '1px', borderTop: '1px solid #000000', display: 'inline-block', color: '#000000' }}>
-                      ALUR PENDAFTARAN UJIAN ({activeProdiObj.name})
-                    </h4>
-                  </div>
-                  <img src="/img/image-ft.png" alt="Logo FT UDINUS" style={{ height: '32px', width: 'auto' }} />
-                </div>
-              </div>
-
-              <div style={{ textAlign: 'center', fontWeight: '800', fontSize: '8pt', marginBottom: '4px', textTransform: 'uppercase', color: '#0f172a', borderBottom: '1px solid #000000', paddingBottom: '2px' }}>
-                HALAMAN 1: TAHAPAN ALUR PENDAFTARAN &amp; BERKAS PERSYARATAN ({activeProdiObj.name})
-              </div>
-
-              {/* 7 STAGE CARDS */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                {cards.filter(c => !isSkipped(c, activeProdi)).map(card => {
-                  const prodiTerm = getProdiTerm(card, activeProdi);
-                  let docsList = [];
-                  try { docsList = JSON.parse(card.docs_json || '[]'); } catch (e) {}
-                  const cleanNote = getCleanNote(card.note, activeProdi);
-
-                  return (
-                    <div key={card.id} style={{ border: '1px solid #94a3b8', borderRadius: '4px', padding: '5px 8px', fontSize: '7pt', lineHeight: 1.2, backgroundColor: '#ffffff' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
-                        <strong style={{ fontWeight: 'bold', color: '#0f172a', fontSize: '7.5pt' }}>{card.title}</strong>
-                        <span style={{ backgroundColor: '#f1f5f9', color: '#0f172a', fontSize: '6.5pt', fontWeight: 'bold', padding: '1px 5px', borderRadius: '3px', border: '1px solid #cbd5e1' }}>
-                          Tahap {card.step_number} {prodiTerm ? `— ${prodiTerm}` : ''}
-                        </span>
-                      </div>
-                      <p style={{ color: '#334155', fontSize: '6.5pt', margin: '1px 0 2px 0' }}>{card.description}</p>
-                      {cleanNote && <div style={{ color: '#1e3a8a', fontSize: '6pt', fontStyle: 'italic', marginBottom: '2px', fontWeight: '600' }}>ℹ️ {cleanNote}</div>}
-                      {docsList.length > 0 && (
-                        <div style={{ backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '3px', padding: '4px 6px', fontSize: '6pt', marginTop: '2px' }}>
-                          <strong style={{ display: 'block', color: '#0f172a', fontWeight: 'bold', marginBottom: '2px' }}>
-                            Berkas Persyaratan (PDF MENTORA - kpta.sisfoftudinus.my.id):
-                          </strong>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px 8px' }}>
-                            {docsList.map((doc, di) => (
-                              <span key={di} style={{ color: '#1e293b', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {di + 1}. {doc.title} {doc.sub ? `(${doc.sub})` : ''}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* FOOTER HALAMAN 1 */}
-            <div style={{ borderTop: '1px solid #000000', paddingTop: '3px', fontSize: '6.5pt', display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
-              <span>Dokumen Resmi Alur Ujian Fakultas Teknik UDINUS</span>
-              <span>Halaman 1 dari 2</span>
-            </div>
-          </div>
-
-          {/* HALAMAN 2 */}
-          <div id="pdf-page-2" style={{ backgroundColor: '#ffffff', color: '#0f172a', width: '210mm', height: '297mm', boxSizing: 'border-box', padding: '10px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              {/* KOP SURAT */}
-              <div style={{ borderBottom: '2px solid #000000', paddingBottom: '4px', marginBottom: '6px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                  <img src="/img/image.png" alt="Logo UDINUS" style={{ height: '32px', width: 'auto' }} />
-                  <div style={{ textAlign: 'center', flex: 1 }}>
-                    <h2 style={{ fontSize: '10pt', fontWeight: 'bold', margin: 0, padding: 0, color: '#000000' }}>UNIVERSITAS DIAN NUSWANTORO</h2>
-                    <h3 style={{ fontSize: '8.5pt', fontWeight: 'bold', margin: 0, padding: 0, color: '#000000' }}>FAKULTAS TEKNIK</h3>
-                    <p style={{ fontSize: '6.5pt', margin: '1px 0', padding: 0, color: '#334155' }}>Jl. Nakula I No. 5-11 Semarang | Telp. (024) 3517261 | Website: ft.dinus.ac.id</p>
-                    <h4 style={{ fontSize: '7.5pt', fontWeight: 'bold', textTransform: 'uppercase', margin: 0, paddingTop: '1px', borderTop: '1px solid #000000', display: 'inline-block', color: '#000000' }}>
-                      DIAGRAM ALUR LOGIKA UJIAN ({activeProdiObj.name})
-                    </h4>
-                  </div>
-                  <img src="/img/image-ft.png" alt="Logo FT UDINUS" style={{ height: '32px', width: 'auto' }} />
-                </div>
-              </div>
-
-              <div style={{ textAlign: 'center', fontWeight: '800', fontSize: '8pt', marginBottom: '6px', textTransform: 'uppercase', color: '#0f172a', borderBottom: '1px solid #000000', paddingBottom: '2px' }}>
-                HALAMAN 2: DIAGRAM ALUR UJIAN ({activeProdiObj.name})
-              </div>
-
-              {/* FLOWCHART PDF (PURE HEX STYLES) */}
-              <div style={{ marginTop: '6px' }}>
-                <PdfFlowchart cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
-              </div>
-            </div>
-
-            {/* FOOTER HALAMAN 2 */}
-            <div style={{ borderTop: '1px solid #000000', paddingTop: '3px', fontSize: '6.5pt', display: 'flex', justifyContent: 'space-between', color: '#475569' }}>
-              <span>Dokumen Resmi Alur Ujian Fakultas Teknik UDINUS</span>
-              <span>Halaman 2 dari 2</span>
-            </div>
-          </div>
-        </div>
+        {/* MODULAR PDF DOCUMENT TEMPLATE (RENDERED OFFSCREEN) */}
+        <PdfExportDocument cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
 
         <footer className="no-print mt-12 text-center text-xs text-slate-500 border-t border-slate-200 pt-6">
           <p>&copy; 2026 Universitas Dian Nuswantoro (UDINUS) — Fakultas Teknik</p>
