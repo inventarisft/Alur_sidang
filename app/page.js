@@ -1,10 +1,7 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
 const API = '/api/stages';
-const ADMIN_PASS_KEY = 'admin_authenticated';
-
-function escHtml(str) { return String(str || ''); }
 
 function getProdiTerm(card, prodiCode) {
   if (prodiCode === 'te') return card.te_term || '';
@@ -34,9 +31,9 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
   });
 
   return (
-    <div className="ansi-flowchart-wrapper">
-      <div className="fc-header">
-        <i className="fa-solid fa-diagram-project" style={{ color: '#2563eb' }} /> Diagram Alur: {prodiObj.name}
+    <div className="ansi-flowchart-wrapper flex flex-col items-center gap-2 p-4 w-full max-w-4xl mx-auto">
+      <div className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-2 text-center flex items-center justify-center gap-2">
+        <i className="fa-solid fa-diagram-project text-blue-600" /> Diagram Alur: {prodiObj.name}
       </div>
       {mainCards.map((c, idx) => {
         const isFirst = idx === 0;
@@ -47,53 +44,63 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
         const annotations = (noteMap[c.step_number] || []);
         const prevCard = idx > 0 ? mainCards[idx - 1] : null;
 
-        const labelJsx = (
-          <>{escHtml(c.title)}{prodiTerm ? <span className="fc-term-label"> ({escHtml(prodiTerm)})</span> : null}</>
+        const labelContent = (
+          <span className="font-bold">
+            {c.title}
+            {prodiTerm && <span className="text-blue-600 font-semibold ml-1">({prodiTerm})</span>}
+          </span>
         );
 
         const annotationSlot = annotations.length > 0 ? (
-          <div className="fc-annotation-slot">
+          <div className="flex flex-col gap-2 w-full sm:w-48 sm:max-w-xs pt-1">
             {annotations.map((n, ni) => (
-              <div key={ni} className="fc-annotation">
-                <i className="fa-solid fa-file-lines" /><span><strong>{escHtml(n.title)}</strong><br />{escHtml(n.note || n.description)}</span>
+              <div key={ni} className="fc-annotation-parallelogram bg-emerald-50 border-1.5 border-emerald-400 border-l-4 border-l-emerald-600 rounded p-2.5 text-xs text-emerald-900 font-semibold flex items-start gap-2 shadow-sm">
+                <i className="fa-solid fa-file-lines text-emerald-600 shrink-0 mt-0.5" />
+                <div><strong className="block text-emerald-950">{n.title}</strong>{n.note || n.description}</div>
               </div>
             ))}
           </div>
         ) : null;
 
         return (
-          <div key={c.id} style={{ display: 'contents' }}>
-            <div className="fc-row-with-note">
+          <div key={c.id} className="w-full flex flex-col items-center">
+            <div className="fc-row-with-note flex flex-col sm:flex-row items-center sm:items-start gap-3 w-full max-w-2xl justify-center">
               {isTerminal ? (
-                <div className={`fc-node-terminal ${isFirst ? 'fc-start' : 'fc-end'}`}>
-                  <i className={`fa-solid ${isFirst ? 'fa-circle-play' : 'fa-flag-checkered'}`} /> {labelJsx}
+                <div className={`px-6 py-2.5 rounded-full font-bold text-sm tracking-wide flex items-center gap-2 shadow-md shrink-0 ${isFirst ? 'bg-slate-900 text-slate-5' : 'bg-emerald-800 text-emerald-50'}`}>
+                  <i className={`fa-solid ${isFirst ? 'fa-circle-play text-emerald-400' : 'fa-flag-checkered text-amber-300'}`} /> {labelContent}
                 </div>
               ) : isDecision ? (
-                <div className="fc-decision-wrapper">
-                  <div className="fc-diamond-outer"><div className="fc-diamond-inner">{labelJsx}</div></div>
-                  <div className="fc-branch-row">
-                    <div className="fc-branch fc-branch-no">
-                      <span className="fc-branch-label">TIDAK / Gagal</span>
-                      <div className="fc-loop-back">
-                        <i className="fa-solid fa-arrow-up" />
-                        <div className="fc-loop-back-label">Kembali ke:<br />{prevCard ? escHtml(prevCard.title) : 'Proses Sebelumnya'}</div>
+                <div className="flex flex-col items-center w-full max-w-md">
+                  <div className="w-36 h-36 bg-amber-50 border-2.5 border-amber-600 rotate-45 flex items-center justify-center my-2 shadow-sm shrink-0">
+                    <div className="-rotate-45 text-center text-xs font-extrabold text-amber-950 p-2 leading-tight max-w-[100px] break-words">
+                      {labelContent}
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-start w-full max-w-xs mt-1 gap-2">
+                    <div className="flex flex-col items-center flex-1">
+                      <span className="text-[11px] font-extrabold text-red-700 block mb-1">TIDAK / Gagal</span>
+                      <div className="flex flex-col items-center gap-1 w-full">
+                        <i className="fa-solid fa-arrow-up text-red-600 text-base" />
+                        <div className="bg-red-50 border border-dashed border-red-300 rounded p-1.5 text-[11px] font-bold text-red-900 text-center leading-tight w-full">
+                          Kembali ke:<br />{prevCard ? prevCard.title : 'Proses Sebelumnya'}
+                        </div>
                       </div>
                     </div>
-                    <div className="fc-branch-arrow-down">
-                      <span className="fc-branch-label">YA / Lulus</span>
-                      <i className="fa-solid fa-arrow-down" style={{ fontSize: '1.3rem' }} />
+                    <div className="flex flex-col items-center flex-1">
+                      <span className="text-[11px] font-extrabold text-emerald-800 block mb-1">YA / Lulus</span>
+                      <i className="fa-solid fa-arrow-down text-emerald-600 text-lg" />
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="fc-node-process">
-                  <div className="fc-node-title">{labelJsx}</div>
-                  {c.description && <div className="fc-node-desc">{escHtml(c.description)}</div>}
+                <div className="w-full max-w-md bg-white border-2 border-slate-900 p-3.5 rounded-lg text-center shadow-sm">
+                  <div className="text-sm font-bold text-slate-900">{labelContent}</div>
+                  {c.description && <div className="text-xs text-slate-600 mt-1 font-medium">{c.description}</div>}
                 </div>
               )}
               {annotationSlot}
             </div>
-            {!isLast && <div className="fc-arrow-down"><i className="fa-solid fa-arrow-down" /></div>}
+            {!isLast && <div className="text-slate-700 text-lg py-1"><i className="fa-solid fa-arrow-down" /></div>}
           </div>
         );
       })}
@@ -105,7 +112,7 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
 function TimelineCards({ cards, prodiList, activeProdi }) {
   const validCards = cards.filter(c => !isSkipped(c, activeProdi));
   return (
-    <div className="timeline">
+    <div className="space-y-4 max-w-3xl mx-auto">
       {validCards.map((card, idx) => {
         let docsList = [];
         try { docsList = JSON.parse(card.docs_json || '[]'); } catch (e) {}
@@ -117,39 +124,47 @@ function TimelineCards({ cards, prodiList, activeProdi }) {
           else term = card.te_term || card.title;
           if (!term) return null;
           return (
-            <span key={p.code} className={`term-pill ${activeProdi !== p.code ? 'dimmed' : ''}`} style={{ borderColor: p.color || '#cbd5e1', color: p.color || '#0f172a', fontWeight: 700 }}>
-              <i className={`fa-solid ${p.icon || 'fa-graduation-cap'}`} /> {p.code.toUpperCase()}: {escHtml(term)}
+            <span key={p.code} className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-md border font-bold ${activeProdi === p.code ? 'bg-blue-50 text-blue-700 border-blue-300 shadow-sm' : 'bg-slate-50 text-slate-500 border-slate-200 opacity-60'}`}>
+              <i className={`fa-solid ${p.icon || 'fa-graduation-cap'}`} style={{ color: p.color || '#2563eb' }} /> {p.code.toUpperCase()}: {term}
             </span>
           );
         }).filter(Boolean);
 
         return (
-          <div key={card.id}>
-            <div className={`timeline-node ${idx === 0 ? 'highlight-node' : ''}`}>
-              <div className="node-header">
-                <span className="node-title">{escHtml(card.title)}</span>
-                <span className="node-step-tag">Tahap {card.step_number}</span>
+          <div key={card.id} className="flex flex-col items-center">
+            <div className={`w-full bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-all ${idx === 0 ? 'ring-2 ring-blue-500/20 border-blue-300' : ''}`}>
+              <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
+                <h3 className="font-bold text-slate-900 text-base">{card.title}</h3>
+                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-slate-100 text-slate-700 border border-slate-200">Tahap {card.step_number}</span>
               </div>
-              <div className="node-desc">{escHtml(card.description)}</div>
+              <p className="text-sm text-slate-600 mb-3">{card.description}</p>
+
               {docsList.length > 0 && (
-                <div className="admin-docs-grid">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 my-3">
                   {docsList.map((doc, di) => doc.link ? (
-                    <a key={di} href={escHtml(doc.link)} target="_blank" rel="noopener noreferrer" className="admin-doc-card highlight-link-card" style={{ textDecoration: 'none', borderColor: '#c7d2fe', background: '#eef2ff' }}>
-                      <i className={`fa-solid ${doc.icon || 'fa-file-lines'}`} style={{ color: '#4338ca' }} />
-                      <div><strong style={{ color: '#4338ca' }}>{escHtml(doc.title)} <i className="fa-solid fa-link" style={{ fontSize: '0.75rem' }} /></strong><span style={{ color: '#3730a3' }}>{escHtml(doc.sub)}</span></div>
+                    <a key={di} href={doc.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-2.5 rounded-lg border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 transition-colors text-indigo-900 text-xs font-semibold">
+                      <i className={`fa-solid ${doc.icon || 'fa-file-lines'} text-indigo-600 text-sm`} />
+                      <div><strong className="block text-indigo-950">{doc.title} <i className="fa-solid fa-link text-[10px]" /></strong><span className="text-indigo-700 font-normal">{doc.sub}</span></div>
                     </a>
                   ) : (
-                    <div key={di} className="admin-doc-card">
-                      <i className={`fa-solid ${doc.icon || 'fa-file-lines'}`} />
-                      <div><strong>{escHtml(doc.title)}</strong><span>{escHtml(doc.sub)}</span></div>
+                    <div key={di} className="flex items-center gap-3 p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-xs text-slate-800">
+                      <i className={`fa-solid ${doc.icon || 'fa-file-lines'} text-slate-500 text-sm`} />
+                      <div><strong className="block text-slate-900">{doc.title}</strong><span className="text-slate-500">{doc.sub}</span></div>
                     </div>
                   ))}
                 </div>
               )}
-              {card.note && <div className="skpi-notice"><i className="fa-solid fa-circle-info" /> {escHtml(card.note)}</div>}
-              {prodiPills.length > 0 && <div className="prodi-terms">{prodiPills}</div>}
+
+              {card.note && (
+                <div className="bg-blue-50 border border-blue-200 text-blue-800 text-xs p-3 rounded-lg flex items-start gap-2 mt-3">
+                  <i className="fa-solid fa-circle-info text-blue-600 mt-0.5 shrink-0" />
+                  <span>{card.note}</span>
+                </div>
+              )}
+
+              {prodiPills.length > 0 && <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-slate-100">{prodiPills}</div>}
             </div>
-            {idx < validCards.length - 1 && <div className="connector"><i className="fa-solid fa-arrow-down" /></div>}
+            {idx < validCards.length - 1 && <div className="text-slate-400 text-base py-1.5"><i className="fa-solid fa-arrow-down" /></div>}
           </div>
         );
       })}
@@ -160,31 +175,37 @@ function TimelineCards({ cards, prodiList, activeProdi }) {
 // ===== PEMETAAN TABLE =====
 function PemetaanTable({ cards, prodiList, activeProdi }) {
   return (
-    <div className="table-section no-print">
-      <div className="section-title"><i className="fa-solid fa-table-columns" /> Pemetaan Istilah Berdasarkan Program Studi</div>
-      <div className="table-wrapper">
-        <table>
+    <div className="mt-10 no-print">
+      <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+        <i className="fa-solid fa-table-columns text-blue-600" /> Pemetaan Istilah Berdasarkan Program Studi
+      </h3>
+      <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-sm bg-white">
+        <table className="w-full text-left text-sm">
           <thead>
-            <tr>
-              <th>Tahapan Ujian</th>
+            <tr className="bg-slate-100 border-b border-slate-200 font-bold text-slate-800">
+              <th className="p-3.5">Tahapan Ujian</th>
               {prodiList.map(p => (
-                <th key={p.code} className={activeProdi === p.code ? 'highlight-col' : ''}>
-                  <i className={`fa-solid ${p.icon || 'fa-graduation-cap'}`} style={{ color: p.color || '#2563eb' }} /> {p.code.toUpperCase()}
+                <th key={p.code} className={`p-3.5 ${activeProdi === p.code ? 'bg-blue-50 text-blue-900 border-x border-blue-200' : ''}`}>
+                  <i className={`fa-solid ${p.icon || 'fa-graduation-cap'} mr-1`} style={{ color: p.color || '#2563eb' }} /> {p.code.toUpperCase()}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-slate-200">
             {cards.map(item => (
-              <tr key={item.id}>
-                <td><strong>{escHtml(item.title)}</strong></td>
+              <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                <td className="p-3.5 font-bold text-slate-900">{item.title}</td>
                 {prodiList.map(p => {
                   let term = '-';
                   if (p.code === 'te') term = item.te_term || '-';
                   else if (p.code === 'tind') term = item.tind_term || '-';
                   else if (p.code === 'tb') term = item.tb_term || '-';
                   else term = item.te_term || item.title;
-                  return <td key={p.code} className={activeProdi === p.code ? 'highlight-col' : ''}>{escHtml(term)}</td>;
+                  return (
+                    <td key={p.code} className={`p-3.5 text-slate-700 ${activeProdi === p.code ? 'bg-blue-50/50 font-bold text-blue-950 border-x border-blue-200' : ''}`}>
+                      {term}
+                    </td>
+                  );
                 })}
               </tr>
             ))}
@@ -201,19 +222,19 @@ function PrintInfoSection({ cards, prodiList, activeProdi }) {
   const validCards = cards.filter(c => !isSkipped(c, activeProdi) && c.shape !== 'note');
   return (
     <div className="print-only-section print-page-2">
-      <div style={{ fontSize: '11pt', fontWeight: 800, textAlign: 'center', marginBottom: 10, textDecoration: 'underline' }}>RINGKASAN INFORMASI TAHAPAN UJIAN</div>
+      <div className="text-center font-extrabold text-sm mb-3 underline">RINGKASAN INFORMASI TAHAPAN UJIAN</div>
       {validCards.map(card => {
         const prodiTerm = getProdiTerm(card, activeProdi);
         const shapeText = card.shape === 'terminal' ? 'Terminal' : card.shape === 'decision' ? 'Evaluasi / Keputusan' : 'Proses';
         return (
-          <div key={card.id} style={{ border: '1px solid #e2e8f0', borderLeft: '4px solid #0f172a', borderRadius: 4, padding: '10px 14px', marginBottom: 8, pageBreakInside: 'avoid' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-              <strong style={{ fontSize: '10pt', color: '#0f172a' }}>{escHtml(card.title)}</strong>
-              <span style={{ fontSize: '8pt', background: '#e2e8f0', padding: '2px 8px', borderRadius: 4, fontWeight: 700, color: '#334155' }}>Tahap {card.step_number} — {shapeText}</span>
+          <div key={card.id} className="border border-slate-300 border-l-4 border-l-slate-900 rounded p-2.5 mb-2 text-xs">
+            <div className="flex justify-between items-center mb-1">
+              <strong className="font-bold text-slate-900 text-xs">{card.title}</strong>
+              <span className="bg-slate-200 px-2 py-0.5 rounded font-bold text-[10px] text-slate-700">Tahap {card.step_number} — {shapeText}</span>
             </div>
-            <div style={{ fontSize: '9pt', color: '#334155', marginBottom: 4 }}>{escHtml(card.description)}</div>
-            {prodiTerm && <div style={{ fontSize: '8pt', color: '#1d4ed8', fontWeight: 700 }}>{prodiObj.name}: {escHtml(prodiTerm)}</div>}
-            {card.note && <div style={{ fontSize: '8pt', color: '#047857', fontStyle: 'italic', marginTop: 3 }}>ℹ️ {escHtml(card.note)}</div>}
+            <div className="text-slate-700 mb-1">{card.description}</div>
+            {prodiTerm && <div className="text-blue-800 font-bold">{prodiObj.name}: {prodiTerm}</div>}
+            {card.note && <div className="text-emerald-800 italic mt-1">ℹ️ {card.note}</div>}
           </div>
         );
       })}
@@ -227,25 +248,25 @@ function PrintParafSection({ cards }) {
   try { adminDocs = JSON.parse(firstCard?.docs_json || '[]'); } catch (e) {}
   return (
     <div className="print-only-section">
-      <div style={{ fontSize: '11pt', fontWeight: 800, textAlign: 'center', marginBottom: 12, textDecoration: 'underline' }}>LEMBAR KONTROL KELENGKAPAN ADMINISTRASI &amp; PARAF VERIFIKASI</div>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div className="text-center font-extrabold text-sm mb-3 underline">LEMBAR KONTROL KELENGKAPAN ADMINISTRASI &amp; PARAF VERIFIKASI</div>
+      <table className="w-full border-collapse border border-slate-900 text-xs">
         <thead>
-          <tr>
-            <th style={{ width: 40, textAlign: 'center' }}>No</th>
-            <th>Berkas Persyaratan Administrasi</th>
-            <th>Keterangan / Sumber</th>
-            <th style={{ width: 120, textAlign: 'center' }}>Status</th>
-            <th style={{ width: 160, textAlign: 'center' }}>Paraf / TTD Verifikator</th>
+          <tr className="bg-slate-100 border-b border-slate-900">
+            <th className="p-2 border-r border-slate-900 text-center w-10">No</th>
+            <th className="p-2 border-r border-slate-900 text-left">Berkas Persyaratan Administrasi</th>
+            <th className="p-2 border-r border-slate-900 text-left">Keterangan / Sumber</th>
+            <th className="p-2 border-r border-slate-900 text-center w-28">Status</th>
+            <th className="p-2 text-center w-36">Paraf / TTD Verifikator</th>
           </tr>
         </thead>
         <tbody>
           {adminDocs.map((doc, idx) => (
-            <tr key={idx}>
-              <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{idx + 1}</td>
-              <td><strong style={{ color: '#0f172a', fontSize: '0.92rem' }}>{escHtml(doc.title)}</strong></td>
-              <td><span style={{ fontSize: '0.85rem', color: '#475569' }}>{escHtml(doc.sub)}</span></td>
-              <td style={{ textAlign: 'center', fontSize: '0.8rem', color: '#94a3b8' }}>[ Lengkap ]</td>
-              <td style={{ height: 42, textAlign: 'center', verticalAlign: 'bottom', fontSize: '0.75rem', color: '#94a3b8' }}>[ Paraf / Ttd ]</td>
+            <tr key={idx} className="border-b border-slate-900">
+              <td className="p-2 border-r border-slate-900 text-center font-bold">{idx + 1}</td>
+              <td className="p-2 border-r border-slate-900 font-bold text-slate-900">{doc.title}</td>
+              <td className="p-2 border-r border-slate-900 text-slate-700">{doc.sub}</td>
+              <td className="p-2 border-r border-slate-900 text-center text-slate-500">[ Lengkap ]</td>
+              <td className="p-2 text-center text-slate-500 h-10 vertical-bottom">[ Paraf / Ttd ]</td>
             </tr>
           ))}
         </tbody>
@@ -271,7 +292,6 @@ export default function HomePage() {
     }
     load();
 
-    // Ctrl+Shift+A shortcut ke admin
     const handler = e => { if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') window.location.href = '/admin'; };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
@@ -282,8 +302,10 @@ export default function HomePage() {
     const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
     const prodiMatch = prodiList.find(p => p.code === activeProdi);
-    document.getElementById('print-timestamp-info').textContent = `Dicetak pada: ${dateStr} pukul ${timeStr} WIB`;
-    document.getElementById('print-prodi-info').textContent = `Program Studi: ${prodiMatch ? prodiMatch.name : activeProdi.toUpperCase()}`;
+    const tsEl = document.getElementById('print-timestamp-info');
+    const prEl = document.getElementById('print-prodi-info');
+    if (tsEl) tsEl.textContent = `Dicetak pada: ${dateStr} pukul ${timeStr} WIB`;
+    if (prEl) prEl.textContent = `Program Studi: ${prodiMatch ? prodiMatch.name : activeProdi.toUpperCase()}`;
     window.print();
   }
 
@@ -303,53 +325,62 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="container">
-        <header>
-          <div className="header-logo-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20, marginBottom: 20, flexWrap: 'wrap' }}>
-            <img src="/img/image.png" alt="Logo UDINUS" style={{ height: 76, width: 'auto', filter: 'drop-shadow(0 4px 14px rgba(99,102,241,0.35))' }} />
-            <div style={{ textAlign: 'center', flex: 1 }}>
-              <div className="badge-top" style={{ marginBottom: 6 }}><i className="fa-solid fa-graduation-cap" /> UDINUS — Fakultas Teknik</div>
-              <h1 style={{ fontSize: '2.2rem', marginBottom: 0 }}>Alur Pendaftaran Ujian CD / PT</h1>
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <header className="mb-8">
+          <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
+            <img src="/img/image.png" alt="Logo UDINUS" className="h-16 w-auto drop-shadow-md" />
+            <div className="text-center flex-1 min-w-[240px]">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-200 mb-2">
+                <i className="fa-solid fa-graduation-cap" /> UDINUS — Fakultas Teknik
+              </div>
+              <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Alur Pendaftaran Ujian CD / PT</h1>
             </div>
-            <img src="/img/image-ft.png" alt="Logo FT UDINUS" style={{ height: 76, width: 'auto', filter: 'drop-shadow(0 4px 14px rgba(59,130,246,0.35))' }} />
+            <img src="/img/image-ft.png" alt="Logo FT UDINUS" className="h-16 w-auto drop-shadow-md" />
           </div>
-          <p className="subtitle">Panduan alur pendaftaran dan pemetaan istilah ujian Capstone Design (CD) / Project Terpadu (PT) untuk prodi FT Udinus.</p>
+          <p className="text-center text-sm text-slate-600 max-w-2xl mx-auto">
+            Panduan alur pendaftaran dan pemetaan istilah ujian Capstone Design (CD) / Project Terpadu (PT) untuk prodi FT Udinus.
+          </p>
         </header>
 
         {/* Sticky Tab Bar */}
-        <div className="sticky-prodi-wrapper">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }} className="tabs-bar-flex">
-            <div className="prodi-tabs">
+        <div className="sticky top-4 z-30 mb-8">
+          <div className="backdrop-blur-md bg-white/90 border border-slate-200/80 rounded-2xl p-2.5 shadow-lg flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
               {prodiList.map(p => {
                 const iconClass = p.icon || (p.code === 'te' ? 'fa-bolt' : p.code === 'tind' ? 'fa-industry' : p.code === 'tb' ? 'fa-heart-pulse' : 'fa-graduation-cap');
+                const isActive = activeProdi === p.code;
                 return (
-                  <button key={p.code} className={`tab-btn ${activeProdi === p.code ? 'active' : ''}`} title={p.name} onClick={() => setActiveProdi(p.code)}>
-                    <i className={`fa-solid ${iconClass}`} style={{ color: activeProdi === p.code ? '#ffffff' : (p.color || '#0f172a') }} />
-                    <span className="tab-text">{p.name}</span>
+                  <button key={p.code} onClick={() => setActiveProdi(p.code)} className={`inline-flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all ${isActive ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
+                    <i className={`fa-solid ${iconClass}`} style={{ color: isActive ? '#38bdf8' : (p.color || '#0f172a') }} />
+                    <span>{p.name}</span>
                   </button>
                 );
               })}
             </div>
-            <button className="btn-action no-print" onClick={handlePdfExport} title="Unduh PDF" style={{ padding: '10px 20px', background: '#059669', fontWeight: 700 }}>
-              <i className="fa-solid fa-file-pdf" /> <span className="btn-text">Unduh / Cetak PDF</span>
+            <button onClick={handlePdfExport} className="no-print inline-flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-all">
+              <i className="fa-solid fa-file-pdf" /> <span>Unduh / Cetak PDF</span>
             </button>
           </div>
         </div>
 
-        {/* Timeline Card (web only) */}
-        <div className="flow-container no-print">
-          <div className="section-header">
-            <div className="section-title"><i className="fa-solid fa-layer-group" /> Tahapan Alur Pendaftaran Ujian</div>
-            <span style={{ fontSize: '0.82rem', color: 'var(--text-dim)' }}>Pilih prodi untuk melihat istilah spesifik</span>
+        {/* Timeline Cards (web only) */}
+        <div className="no-print mb-12">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <i className="fa-solid fa-layer-group text-blue-600" /> Tahapan Alur Pendaftaran Ujian
+            </h2>
+            <span className="text-xs text-slate-500">Pilih prodi untuk melihat istilah spesifik</span>
           </div>
           <TimelineCards cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
         </div>
 
         {/* ANSI Flowchart (web + PDF Halaman 1) */}
-        <div className="flow-container print-page-1" style={{ marginTop: 40 }}>
-          <div className="section-header">
-            <div className="section-title"><i className="fa-solid fa-diagram-project" /> Diagram Flowchart Teknik (ANSI Standard)</div>
-            <span style={{ fontSize: '0.82rem', color: 'var(--text-dim)' }} className="no-print">Skema alur logika &amp; percabangan prodi</span>
+        <div className="print-page-1 mb-12">
+          <div className="flex items-center justify-between mb-4 no-print">
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <i className="fa-solid fa-diagram-project text-blue-600" /> Diagram Flowchart Teknik (ANSI Standard)
+            </h2>
+            <span className="text-xs text-slate-500">Skema alur logika &amp; percabangan prodi</span>
           </div>
           <AnsiFlowchart cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
         </div>
@@ -365,14 +396,14 @@ export default function HomePage() {
 
         {/* Print Footer */}
         <div className="print-footer">
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', borderTop: '1px solid #000', paddingTop: 6 }}>
+          <div className="flex justify-between text-[10px] border-t border-black pt-1.5">
             <span id="print-timestamp-info">Dicetak pada: -</span>
             <span id="print-prodi-info">Program Studi: -</span>
             <span>Dokumen Resmi Fakultas Teknik UDINUS</span>
           </div>
         </div>
 
-        <footer className="no-print">
+        <footer className="no-print mt-12 text-center text-xs text-slate-500 border-t border-slate-200 pt-6">
           <p>&copy; 2026 Universitas Dian Nuswantoro (UDINUS) — Fakultas Teknik</p>
         </footer>
       </div>
