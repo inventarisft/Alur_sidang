@@ -16,6 +16,15 @@ function isSkipped(card, prodiCode) {
   return false;
 }
 
+function getCleanNote(note, activeProdi) {
+  if (!note) return '';
+  const lower = note.toLowerCase();
+  if (activeProdi !== 'tind' && (lower.includes('teknik industri') || lower.includes('tind:'))) {
+    return '';
+  }
+  return note;
+}
+
 // ===== FLOWCHART =====
 function AnsiFlowchart({ cards, prodiList, activeProdi }) {
   const prodiObj = prodiList.find(p => p.code === activeProdi) || { name: activeProdi.toUpperCase() };
@@ -145,12 +154,15 @@ function TimelineCards({ cards, prodiList, activeProdi }) {
                 </div>
               )}
 
-              {card.note && (
-                <div className="bg-blue-50 border border-blue-200 text-blue-900 text-xs p-3 rounded-xl flex items-start gap-2 mt-3 font-medium">
-                  <i className="fa-solid fa-circle-info text-blue-600 mt-0.5 shrink-0" />
-                  <span>{card.note}</span>
-                </div>
-              )}
+              {(() => {
+                const cleanNote = getCleanNote(card.note, activeProdi);
+                return cleanNote ? (
+                  <div className="bg-blue-50 border border-blue-200 text-blue-900 text-xs p-3 rounded-xl flex items-start gap-2 mt-3 font-medium">
+                    <i className="fa-solid fa-circle-info text-blue-600 mt-0.5 shrink-0" />
+                    <span>{cleanNote}</span>
+                  </div>
+                ) : null;
+              })()}
 
               {currentTerm && (
                 <div className="mt-3 pt-3 border-t border-slate-100">
@@ -231,7 +243,7 @@ function PrintInfoSection({ cards, prodiList, activeProdi }) {
             </div>
             <div className="text-slate-700 mb-1">{card.description}</div>
             {prodiTerm && <div className="text-blue-800 font-bold">{prodiObj.name}: {prodiTerm}</div>}
-            {card.note && <div className="text-emerald-800 italic mt-1">ℹ️ {card.note}</div>}
+            {getCleanNote(card.note, activeProdi) && <div className="text-emerald-800 italic mt-1">ℹ️ {getCleanNote(card.note, activeProdi)}</div>}
           </div>
         );
       })}
