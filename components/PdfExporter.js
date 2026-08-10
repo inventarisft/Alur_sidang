@@ -23,7 +23,7 @@ function getCleanNote(note, activeProdi) {
   return note;
 }
 
-// ===== PURE NATIVE JSPDF GENERATOR (100% PERFECT MATCH WITH WEB FLOWCHART LAYOUT) =====
+// ===== PURE NATIVE JSPDF GENERATOR (MATHEMATICALLY PERFECT ALIGNMENT) =====
 export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLoading }) {
   if (!cards || cards.length === 0 || !prodiList || prodiList.length === 0) {
     alert('Data belum selesai dimuat. Silakan tunggu beberapa detik dan coba lagi.');
@@ -44,7 +44,6 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
 
     // Helper: Draw Header (Kop Surat)
     const drawKopSurat = (pageTitle) => {
-      // Logos
       if (udinusLogo) {
         try { pdf.addImage(udinusLogo, 'PNG', 12, 8, 16, 16); } catch (e) {}
       }
@@ -52,10 +51,9 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
         try { pdf.addImage(ftLogo, 'PNG', 182, 8, 16, 16); } catch (e) {}
       }
 
-      // Kop Text
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(11);
-      pdf.setTextColor(15, 23, 42); // dark slate
+      pdf.setTextColor(15, 23, 42);
       pdf.text('UNIVERSITAS DIAN NUSWANTORO', 105, 12, { align: 'center' });
 
       pdf.setFontSize(9.5);
@@ -71,14 +69,12 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
       pdf.setTextColor(15, 23, 42);
       pdf.text(`ALUR PENDAFTARAN UJIAN (${prodiName.toUpperCase()})`, 105, 25, { align: 'center' });
 
-      // Double Line Separator
       pdf.setDrawColor(15, 23, 42);
       pdf.setLineWidth(0.6);
       pdf.line(12, 27.5, 198, 27.5);
       pdf.setLineWidth(0.2);
       pdf.line(12, 28.3, 198, 28.3);
 
-      // Section Banner Badge
       pdf.setFillColor(241, 245, 249);
       pdf.setDrawColor(203, 213, 225);
       pdf.roundedRect(12, 30.5, 186, 6, 1, 1, 'FD');
@@ -206,7 +202,7 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
     drawFooter(1);
 
     // ==========================================
-    // HALAMAN 2: DIAGRAM ALUR LOGIKA (MIRRORING WEB LAYOUT EXACTLY)
+    // HALAMAN 2: DIAGRAM ALUR LOGIKA (PRECISE VECTOR MATHEMATICS)
     // ==========================================
     pdf.addPage();
     drawKopSurat(`HALAMAN 2: DIAGRAM ALUR UJIAN (${prodiName.toUpperCase()})`);
@@ -227,12 +223,12 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
         const tw = pdf.getTextWidth(labelText) + 4;
         pdf.setFillColor(236, 253, 245);
         pdf.setDrawColor(110, 231, 183);
-        pdf.roundedRect(x - (tw / 2), ((yTop + yBottom) / 2) - 2.5, tw, 4.5, 1, 1, 'FD');
-        pdf.text(labelText, x, ((yTop + yBottom) / 2) + 0.8, { align: 'center' });
+        pdf.roundedRect(x - (tw / 2), ((yTop + yBottom) / 2) - 2.2, tw, 4.4, 1, 1, 'FD');
+        pdf.text(labelText, x, ((yTop + yBottom) / 2) + 0.9, { align: 'center' });
       }
     };
 
-    const centerX = 105; // Perfect A4 Center
+    const centerX = 105; // Exact A4 Center Axis
 
     // 1. Start Terminal Box (Center 105)
     pdf.setFillColor(15, 23, 42);
@@ -252,14 +248,14 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
     pdf.setFillColor(239, 246, 255);
     pdf.setDrawColor(191, 219, 254);
     pdf.setLineWidth(0.3);
-    pdf.roundedRect(centerX - 44, 52, 88, 5.2, 1, 1, 'FD');
+    pdf.roundedRect(centerX - 44, 52, 88, 5, 1, 1, 'FD');
 
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(6.3);
+    pdf.setFontSize(5.8);
     pdf.setTextColor(30, 58, 138);
-    pdf.text('i  Pengisian SKPI (sisfoftudinus.my.id) & Link n Match (alumni.sisfoftudinus.my.id) dicicil sejak Smt 1', centerX, 55.6, { align: 'center' });
+    pdf.text('i  Pengisian SKPI (sisfoftudinus.my.id) & Link n Match (alumni.sisfoftudinus.my.id) dapat dicicil sejak Smt 1', centerX, 55.4, { align: 'center' });
 
-    drawDownArrow(centerX, 57.2, 66);
+    drawDownArrow(centerX, 57, 66);
 
     // 2. Process Box 2: Ujian Proposal (Center 105)
     const box2Width = 84;
@@ -297,24 +293,26 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
 
     drawDownArrow(centerX, 83, 93);
 
-    // 3. Decision Node (Diamond Center 105, 107)
-    const cy = 107, rx = 19, ry = 13.5;
+    // 3. Decision Node (Diamond Center EXACTLY at 105, 107)
+    // rx = 20, ry = 13.5
+    // Top vertex = (105, 93.5), Right = (125, 107), Bottom = (105, 120.5), Left = (85, 107)
+    const cy = 107, rx = 20, ry = 13.5;
 
     pdf.setFillColor(254, 243, 199);
     pdf.setDrawColor(217, 119, 6);
     pdf.setLineWidth(0.6);
 
-    // Polygon Diamond Points: Top, Right, Bottom, Left
+    // Draw Diamond starting from TOP VERTEX (105, 93.5)
     pdf.lines([
-      [rx, ry],
-      [-rx, ry],
-      [-rx, -ry],
-      [rx, -ry]
-    ], centerX - rx, cy, [1, 1], 'FD', true);
+      [rx, ry],     // to Right (125, 107)
+      [-rx, ry],    // to Bottom (105, 120.5)
+      [-rx, -ry],   // to Left (85, 107)
+      [rx, -ry]     // back to Top (105, 93.5)
+    ], centerX, cy - ry, [1, 1], 'FD', true);
 
     // Text INSIDE Diamond (CENTERED AT 105, 107)
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(8);
+    pdf.setFontSize(8.2);
     pdf.setTextColor(120, 53, 15);
     pdf.text('3. UJIAN SEMHAS', centerX, cy - 3.5, { align: 'center' });
     pdf.setFontSize(7.2);
@@ -327,9 +325,9 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
     pdf.setDrawColor(220, 38, 38);
     pdf.setLineWidth(0.5);
 
-    // Left from Diamond vertex (105 - 19 = 86) to x = 25
+    // Left from Diamond left vertex (85, 107) to x = 25
     pdf.line(centerX - rx, cy, 25, cy);
-    // Up from (25, cy) to (25, 74.5)
+    // Up from (25, 107) to (25, 74.5)
     pdf.line(25, cy, 25, 74.5);
     // Right from (25, 74.5) into Box 2 (box2Left = 63)
     pdf.line(25, 74.5, box2Left, 74.5);
@@ -357,72 +355,72 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
     pdf.setFillColor(255, 255, 255);
     pdf.setDrawColor(15, 23, 42);
     pdf.setLineWidth(0.5);
-    pdf.roundedRect(box2Left, 131, box2Width, 20, 2, 2, 'FD');
+    pdf.roundedRect(box2Left, 131, box2Width, 23, 2, 2, 'FD');
 
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(9);
     pdf.setTextColor(15, 23, 42);
-    pdf.text('4. SIDANG AKHIR', centerX, 136.5, { align: 'center' });
+    pdf.text('4. SIDANG AKHIR', centerX, 136, { align: 'center' });
     pdf.setFontSize(7.5);
     pdf.setTextColor(37, 99, 235);
-    pdf.text('(Capstone Design 2 (Sidang Akhir))', centerX, 140.5, { align: 'center' });
+    pdf.text('(Capstone Design 2 (Sidang Akhir))', centerX, 140, { align: 'center' });
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(6.3);
     pdf.setTextColor(71, 85, 105);
-    pdf.text('Ujian pertanggungjawaban karya akhir di hadapan dewan penguji.', centerX, 144, { align: 'center' });
+    pdf.text('Ujian pertanggungjawaban karya akhir di hadapan dewan penguji.', centerX, 143.5, { align: 'center' });
 
-    // Info Note 4 inside Box
+    // Info Note 4 inside Box (Spaced below text, no overlapping!)
     pdf.setFillColor(239, 246, 255);
     pdf.setDrawColor(191, 219, 254);
-    pdf.roundedRect(box2Left + 3, 145.5, box2Width - 6, 4.2, 1, 1, 'FD');
+    pdf.roundedRect(box2Left + 3, 146.5, box2Width - 6, 4.5, 1, 1, 'FD');
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(6);
+    pdf.setFontSize(5.8);
     pdf.setTextColor(30, 58, 138);
-    pdf.text('i  Batas Akhir Validasi SKPI (sisfoftudinus.my.id) wajib tervalidasi sebelum Yudisium.', centerX, 148.5, { align: 'center' });
+    pdf.text('i  Batas Akhir Validasi SKPI (sisfoftudinus.my.id) wajib tervalidasi sebelum Yudisium.', centerX, 149.8, { align: 'center' });
 
-    drawDownArrow(centerX, 151, 159);
+    drawDownArrow(centerX, 154, 161);
 
     // 5. Process Box 5: Yudisium (Center 105)
     pdf.setFillColor(255, 255, 255);
     pdf.setDrawColor(15, 23, 42);
     pdf.setLineWidth(0.5);
-    pdf.roundedRect(box2Left, 159, box2Width, 20, 2, 2, 'FD');
+    pdf.roundedRect(box2Left, 161, box2Width, 23, 2, 2, 'FD');
 
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(9);
     pdf.setTextColor(15, 23, 42);
-    pdf.text('5. YUDISIUM', centerX, 164.5, { align: 'center' });
+    pdf.text('5. YUDISIUM', centerX, 166, { align: 'center' });
     pdf.setFontSize(7.5);
     pdf.setTextColor(37, 99, 235);
-    pdf.text('(Yudisium CD)', centerX, 168.5, { align: 'center' });
+    pdf.text('(Yudisium CD)', centerX, 170, { align: 'center' });
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(6.3);
     pdf.setTextColor(71, 85, 105);
-    pdf.text('Penetapan kelulusan resmi setelah nilai sidang, SKPI, dan Link n Match tervalidasi penuh.', centerX, 172, { align: 'center' });
+    pdf.text('Penetapan kelulusan resmi setelah nilai sidang, SKPI, dan Link n Match tervalidasi penuh.', centerX, 173.5, { align: 'center' });
 
-    // Info Note 5 inside Box
+    // Info Note 5 inside Box (Spaced below text, no overlapping!)
     pdf.setFillColor(239, 246, 255);
     pdf.setDrawColor(191, 219, 254);
-    pdf.roundedRect(box2Left + 3, 173.5, box2Width - 6, 4.2, 1, 1, 'FD');
+    pdf.roundedRect(box2Left + 3, 176.5, box2Width - 6, 4.5, 1, 1, 'FD');
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(5.8);
     pdf.setTextColor(30, 58, 138);
-    pdf.text('i  Syarat SKPI (sisfoftudinus.my.id), Link n Match & MENTORA wajib tervalidasi penuh.', centerX, 176.5, { align: 'center' });
+    pdf.text('i  Syarat SKPI (sisfoftudinus.my.id), Link n Match & MENTORA wajib tervalidasi penuh.', centerX, 179.8, { align: 'center' });
 
-    drawDownArrow(centerX, 179, 187);
+    drawDownArrow(centerX, 184, 191);
 
     // 6. Terminal Box 6: Wisuda (Center 105)
     pdf.setFillColor(6, 95, 70);
     pdf.setDrawColor(6, 95, 70);
-    pdf.roundedRect(centerX - 25, 187, 50, 9.5, 4.7, 4.7, 'FD');
+    pdf.roundedRect(centerX - 25, 191, 50, 9.5, 4.7, 4.7, 'FD');
 
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(8.5);
     pdf.setTextColor(255, 255, 255);
-    pdf.text('6. WISUDA', centerX, 191.5, { align: 'center' });
+    pdf.text('6. WISUDA', centerX, 195.5, { align: 'center' });
     pdf.setFontSize(7);
     pdf.setTextColor(254, 240, 138);
-    pdf.text('(Wisuda)', centerX, 195, { align: 'center' });
+    pdf.text('(Wisuda)', centerX, 199, { align: 'center' });
 
     drawFooter(2);
 
