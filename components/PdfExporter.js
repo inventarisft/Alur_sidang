@@ -23,7 +23,7 @@ function getCleanNote(note, activeProdi) {
   return note;
 }
 
-// ===== PURE NATIVE JSPDF GENERATOR (ZERO REDUNDANT NUMBERING & COMPLETE FULL UNTRUNCATED TEXT) =====
+// ===== PURE NATIVE JSPDF GENERATOR (CLEAN TEXT BRANCH LABELS & NOTE ANNOTATION STYLE) =====
 export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLoading }) {
   if (!cards || cards.length === 0 || !prodiList || prodiList.length === 0) {
     alert('Data belum selesai dimuat. Silakan tunggu beberapa detik dan coba lagi.');
@@ -196,7 +196,6 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
           const posX = col === 0 ? 17 : 104;
           const posY = contentY + 7 + (row * 3.6);
 
-          // Clean title: remove redundant leading "1. " if doc.title already starts with a number
           let titleText = (doc.title || '').trim();
           if (!/^\d+\.\s*/.test(titleText)) {
             titleText = `${di + 1}. ${titleText}`;
@@ -206,7 +205,6 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
             titleText += ` (${doc.sub})`;
           }
 
-          // Full text display up to 64 chars without premature "..." truncation
           const displayStr = titleText.length > 64 ? titleText.substring(0, 62) + '..' : titleText;
           pdf.text(displayStr, posX, posY);
         });
@@ -218,7 +216,7 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
     drawFooter(1);
 
     // ==========================================
-    // HALAMAN 2: DIAGRAM ALUR LOGIKA (RESPONSIVE AUTO-WRAPPED TEXT & CONTAINERS)
+    // HALAMAN 2: DIAGRAM ALUR LOGIKA (CLEAN TEXT LABELS & NOTE ANNOTATION STYLE)
     // ==========================================
     pdf.addPage();
     drawKopSurat(`HALAMAN 2: DIAGRAM ALUR UJIAN (${prodiName.toUpperCase()})`);
@@ -231,16 +229,12 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
       pdf.setFillColor(51, 65, 85);
       pdf.triangle(x - 1.2, yBottom - 2, x + 1.2, yBottom - 2, x, yBottom, 'F');
 
+      // Pure text label (NO RECTANGLE CONTAINER!)
       if (labelText) {
         pdf.setFont('helvetica', 'bold');
         pdf.setFontSize(7.5);
-        pdf.setTextColor(6, 78, 59);
-
-        const tw = pdf.getTextWidth(labelText) + 4;
-        pdf.setFillColor(236, 253, 245);
-        pdf.setDrawColor(110, 231, 183);
-        pdf.roundedRect(x - (tw / 2), ((yTop + yBottom) / 2) - 2.2, tw, 4.4, 1, 1, 'FD');
-        pdf.text(labelText, x, ((yTop + yBottom) / 2) + 0.9, { align: 'center' });
+        pdf.setTextColor(5, 150, 105); // emerald-600
+        pdf.text(labelText, x, ((yTop + yBottom) / 2) + 0.8, { align: 'center' });
       }
     };
 
@@ -260,7 +254,7 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
     pdf.setTextColor(56, 189, 248);
     pdf.text('(Syarat Berkas (CD))', centerX, 48.7, { align: 'center' });
 
-    // Note 1 Info Box (Soft Blue like Web - Auto Wrapped to 106mm Container Width)
+    // Note 1 Info Box (Soft Blue Note Annotation Style)
     const note1Str = 'i  Pengisian SKPI (sisfoftudinus.my.id) & Link n Match (alumni.sisfoftudinus.my.id) dapat dicicil sejak Smt 1';
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(5.8);
@@ -299,37 +293,49 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
     pdf.setTextColor(71, 85, 105);
     pdf.text('Mendaftar ujian proposal pada MENTORA (kpta.sisfoftudinus.my.id)', centerX, 79, { align: 'center' });
 
-    // Side Note Box (Right - Emerald Green like Web)
-    pdf.setFillColor(236, 253, 245);
-    pdf.setDrawColor(52, 211, 153);
-    pdf.roundedRect(151, 66, 46, 17, 1.5, 1.5, 'FD');
+    // Side Note Annotation Box (EMERALD NOTE ANNOTATION STYLE WITH THICK LEFT BORDER!)
+    const sideNoteLeft = 151;
+    const sideNoteTop = 66;
+    const sideNoteW = 46;
+    const sideNoteH = 17;
+
+    pdf.setFillColor(236, 253, 245); // emerald-50
+    pdf.setDrawColor(52, 211, 153); // emerald-400
+    pdf.setLineWidth(0.3);
+    pdf.roundedRect(sideNoteLeft, sideNoteTop, sideNoteW, sideNoteH, 1.5, 1.5, 'FD');
+
+    // Thick Left Accent Border (Note Annotation Style)
+    pdf.setDrawColor(5, 150, 105); // emerald-600
+    pdf.setLineWidth(1.2);
+    pdf.line(sideNoteLeft, sideNoteTop + 1, sideNoteLeft, sideNoteTop + sideNoteH - 1);
+
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(6.6);
     pdf.setTextColor(6, 78, 59);
-    pdf.text('UPDATE SKPI RUTIN & VERIFIKASI', 174, 70.5, { align: 'center' });
-    pdf.text('LINK N MATCH', 174, 74.5, { align: 'center' });
+    pdf.text('UPDATE SKPI RUTIN & VERIFIKASI', sideNoteLeft + (sideNoteW / 2) + 0.6, 70.5, { align: 'center' });
+    pdf.text('LINK N MATCH', sideNoteLeft + (sideNoteW / 2) + 0.6, 74.5, { align: 'center' });
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(5.6);
-    pdf.text('Memperbarui SKPI & Link n Match', 174, 78.5, { align: 'center' });
+    pdf.text('Memperbarui SKPI & Link n Match', sideNoteLeft + (sideNoteW / 2) + 0.6, 78.5, { align: 'center' });
 
     drawDownArrow(centerX, 83, 93);
 
-    // 3. Decision Node (Diamond Center EXACTLY at 105, 108 - Enlarged to 46mm Width)
+    // 3. Decision Node (Diamond Center EXACTLY at 105, 108)
     const cy = 108, rx = 23, ry = 14.5;
 
     pdf.setFillColor(254, 243, 199);
     pdf.setDrawColor(217, 119, 6);
     pdf.setLineWidth(0.6);
 
-    // Draw Diamond starting from TOP VERTEX (105, 108 - 14.5 = 93.5)
+    // Draw Diamond starting from TOP VERTEX (105, 93.5)
     pdf.lines([
-      [rx, ry],     // to Right (128, 108)
-      [-rx, ry],    // to Bottom (105, 122.5)
-      [-rx, -ry],   // to Left (82, 108)
-      [rx, -ry]     // back to Top (105, 93.5)
+      [rx, ry],
+      [-rx, ry],
+      [-rx, -ry],
+      [rx, -ry]
     ], centerX, cy - ry, [1, 1], 'FD', true);
 
-    // Text INSIDE Diamond (CENTERED AT 105, 108 - FITS 100% INSIDE)
+    // Text INSIDE Diamond (CENTERED AT 105, 108)
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(8);
     pdf.setTextColor(120, 53, 15);
@@ -355,20 +361,18 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
     pdf.setFillColor(220, 38, 38);
     pdf.triangle(box2Left - 2, 73.3, box2Left - 2, 75.7, box2Left, 74.5, 'F');
 
-    // Label Badge for TIDAK / GAGAL (Left of Diamond)
-    pdf.setFillColor(254, 242, 242);
-    pdf.setDrawColor(252, 165, 165);
-    pdf.roundedRect(14, 92, 38, 9.5, 1.5, 1.5, 'FD');
+    // Label Text for TIDAK / GAGAL (PURE TEXT, NO RECTANGLE CONTAINER!)
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(7.5);
-    pdf.setTextColor(185, 28, 28);
-    pdf.text('TIDAK / GAGAL', 33, 96, { align: 'center' });
+    pdf.setTextColor(185, 28, 28); // red-700
+    pdf.text('TIDAK / GAGAL', 34, 96, { align: 'center' });
+    pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(6.3);
-    pdf.setTextColor(127, 29, 29);
-    pdf.text('Ulang: 2. Ujian Proposal', 33, 100, { align: 'center' });
+    pdf.setTextColor(127, 29, 29); // red-900
+    pdf.text('Ulang: 2. Ujian Proposal', 34, 100, { align: 'center' });
 
-    // BOTTOM BRANCH: YA / LULUS Arrow to Step 4
-    drawDownArrow(centerX, cy + ry, 132, 'YA / Lulus');
+    // BOTTOM BRANCH: YA / LULUS Arrow to Step 4 (PURE TEXT, NO RECTANGLE CONTAINER!)
+    drawDownArrow(centerX, cy + ry, 132, 'YA / Lulus ▼');
 
     // 4. Process Box 4: Sidang Akhir (Center 105)
     const box4Width = 92;
@@ -391,7 +395,7 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
     pdf.setTextColor(71, 85, 105);
     pdf.text('Ujian pertanggungjawaban karya akhir di hadapan dewan penguji.', centerX, 144.5, { align: 'center' });
 
-    // Info Note 4 inside Box (Auto-wrapped inside container width)
+    // Info Note 4 inside Box
     const note4Str = 'i  Batas Akhir Validasi SKPI (sisfoftudinus.my.id) wajib tervalidasi sebelum Yudisium.';
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(5.7);
@@ -430,7 +434,7 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
 
     const yNote5 = 173.5 + (desc5Lines.length * 2.8);
 
-    // Info Note 5 inside Box (Auto-wrapped inside container width)
+    // Info Note 5 inside Box
     const note5Str = 'i  Syarat SKPI (sisfoftudinus.my.id), Link n Match & MENTORA wajib tervalidasi penuh.';
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(5.6);
