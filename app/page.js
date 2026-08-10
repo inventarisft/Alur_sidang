@@ -58,10 +58,10 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
         const annotations = (noteMap[c.step_number] || []);
         const prevCard = idx > 0 ? mainCards[idx - 1] : null;
 
-        const labelContent = (
+        const getLabelContent = (termColorClass = "text-blue-600") => (
           <span className="font-bold">
             {c.title}
-            {prodiTerm && <span className="text-blue-600 font-semibold block text-[10px] sm:text-xs mt-0.5">({prodiTerm})</span>}
+            {prodiTerm && <span className={`${termColorClass} font-semibold block text-[10px] sm:text-xs mt-0.5`}>({prodiTerm})</span>}
           </span>
         );
 
@@ -86,7 +86,8 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
               {isTerminal ? (
                 <div className="flex flex-col items-center">
                   <div className={`px-4 py-2 rounded-full font-bold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 shadow-sm shrink-0 text-center max-w-full ${isFirst ? 'bg-slate-900 text-slate-50' : 'bg-emerald-800 text-emerald-50'}`}>
-                    <i className={`fa-solid ${isFirst ? 'fa-circle-play text-emerald-400' : 'fa-flag-checkered text-amber-300'}`} /> {labelContent}
+                    <i className={`fa-solid ${isFirst ? 'fa-circle-play text-emerald-400' : 'fa-flag-checkered text-amber-300'}`} />
+                    {getLabelContent(isFirst ? "text-sky-300" : "text-amber-200")}
                   </div>
                   {cleanNote && (
                     <div className="mt-1 bg-blue-50 border border-blue-200 text-blue-900 text-[9px] sm:text-[10px] font-semibold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs max-w-xs text-center">
@@ -111,7 +112,7 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
                     {/* BELAH KETUPAT (DI TENGAH) */}
                     <div className="w-28 h-28 sm:w-36 sm:h-36 bg-amber-50 border-2 border-amber-600 rotate-45 flex items-center justify-center shadow-xs shrink-0 relative z-0">
                       <div className="-rotate-45 text-center text-[9px] sm:text-xs font-extrabold text-amber-950 p-1.5 leading-tight max-w-[85px] sm:max-w-[100px] break-words">
-                        {labelContent}
+                        {getLabelContent("text-amber-800")}
                       </div>
                     </div>
                   </div>
@@ -128,7 +129,7 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
                 </div>
               ) : (
                 <div className="w-full max-w-md bg-white border-2 border-slate-900 p-2.5 sm:p-3 rounded-xl text-center shadow-xs">
-                  <div className="text-xs sm:text-sm font-bold text-slate-900">{labelContent}</div>
+                  <div className="text-xs sm:text-sm font-bold text-slate-900">{getLabelContent()}</div>
                   {c.description && <div className="text-[10px] sm:text-xs text-slate-600 mt-0.5 font-medium">{c.description}</div>}
                   {cleanNote && (
                     <div className="mt-1.5 bg-blue-50 border border-blue-200 text-blue-900 text-[9.5px] sm:text-[10.5px] font-semibold px-2 py-1 rounded-lg inline-flex items-center justify-center gap-1 w-full text-center">
