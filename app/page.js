@@ -227,11 +227,7 @@ function TimelineCards({ cards, prodiList, activeProdi }) {
 // ===== PEMETAAN TABLE =====
 function PemetaanTable({ cards, prodiList, activeProdi }) {
   return (
-    <div className="mt-10 no-print">
-      <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-        <i className="fa-solid fa-table-columns text-blue-600" /> Pemetaan Istilah Berdasarkan Program Studi
-      </h3>
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm bg-white">
+    <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-xs bg-white">
         <table className="w-full text-left text-xs sm:text-sm">
           <thead>
             <tr className="bg-slate-100 border-b border-slate-200 font-bold text-slate-800 whitespace-nowrap">
@@ -264,7 +260,6 @@ function PemetaanTable({ cards, prodiList, activeProdi }) {
           </tbody>
         </table>
       </div>
-    </div>
   );
 }
 
@@ -332,6 +327,15 @@ export default function HomePage() {
   const [cards, setCards] = useState([]);
   const [prodiList, setProdiList] = useState([]);
   const [activeProdi, setActiveProdi] = useState('te');
+  const [openSections, setOpenSections] = useState({
+    timeline: true,   // Default Terbuka
+    flowchart: true,  // Default Terbuka
+    table: false      // Default Tertutup
+  });
+
+  const toggleSection = (key) => {
+    setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   useEffect(() => {
     async function load() {
@@ -420,30 +424,97 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Timeline Cards (web only) */}
-        <div className="no-print mb-12">
-          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-              <i className="fa-solid fa-layer-group text-blue-600" /> Tahapan Alur Pendaftaran ({activeProdiObj.name})
-            </h2>
-            <span className="text-xs text-slate-500">Menampilkan alur spesifik {activeProdiObj.name}</span>
-          </div>
-          <TimelineCards cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
+        {/* Section 1: Tahapan Alur Pendaftaran (default TERBUKA) */}
+        <div className="no-print mb-8 bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm">
+          <button
+            onClick={() => toggleSection('timeline')}
+            className="w-full flex items-center justify-between gap-2 text-left cursor-pointer group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 text-base font-bold shadow-xs">
+                <i className="fa-solid fa-layer-group" />
+              </div>
+              <div>
+                <h2 className="text-base sm:text-lg font-extrabold text-slate-900 group-hover:text-blue-600 transition-colors">
+                  Tahapan Alur Pendaftaran ({activeProdiObj.name})
+                </h2>
+                <span className="text-xs text-slate-500 hidden sm:inline">Menampilkan alur spesifik & berkas {activeProdiObj.name}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5 text-blue-700 font-bold text-xs bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-200/60">
+              <span>{openSections.timeline ? 'Sembunyikan' : 'Tampilkan'}</span>
+              <i className={`fa-solid fa-chevron-down text-xs transition-transform duration-200 ${openSections.timeline ? 'rotate-180' : ''}`} />
+            </div>
+          </button>
+
+          {openSections.timeline && (
+            <div className="mt-6 pt-5 border-t border-slate-100">
+              <TimelineCards cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
+            </div>
+          )}
         </div>
 
-        {/* Flowchart (web + PDF Halaman 1) */}
-        <div className="print-page-1 mb-12">
-          <div className="flex items-center justify-between mb-4 no-print flex-wrap gap-2">
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-              <i className="fa-solid fa-diagram-project text-blue-600" /> Diagram Alur Ujian ({activeProdiObj.name})
-            </h2>
-            <span className="text-xs text-slate-500">Skema alur logika &amp; percabangan {activeProdiObj.name}</span>
+        {/* Section 2: Diagram Alur Ujian (default TERBUKA) */}
+        <div className="print-page-1 mb-8 bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm">
+          <div className="no-print">
+            <button
+              onClick={() => toggleSection('flowchart')}
+              className="w-full flex items-center justify-between gap-2 text-left cursor-pointer group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 text-base font-bold shadow-xs">
+                  <i className="fa-solid fa-diagram-project" />
+                </div>
+                <div>
+                  <h2 className="text-base sm:text-lg font-extrabold text-slate-900 group-hover:text-amber-600 transition-colors">
+                    Diagram Alur Ujian ({activeProdiObj.name})
+                  </h2>
+                  <span className="text-xs text-slate-500 hidden sm:inline">Skema alur logika & percabangan {activeProdiObj.name}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 text-amber-800 font-bold text-xs bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200/60">
+                <span>{openSections.flowchart ? 'Sembunyikan' : 'Tampilkan'}</span>
+                <i className={`fa-solid fa-chevron-down text-xs transition-transform duration-200 ${openSections.flowchart ? 'rotate-180' : ''}`} />
+              </div>
+            </button>
           </div>
-          <AnsiFlowchart cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
+
+          {(openSections.flowchart || typeof window === 'undefined') && (
+            <div className="mt-4 pt-4 sm:pt-5 border-t border-slate-100 no-print-border-t">
+              <AnsiFlowchart cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
+            </div>
+          )}
         </div>
 
-        {/* Pemetaan Table (web only) */}
-        <PemetaanTable cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
+        {/* Section 3: Pemetaan Istilah (bisa dibuka-tutup) */}
+        <div className="no-print mb-12 bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm">
+          <button
+            onClick={() => toggleSection('table')}
+            className="w-full flex items-center justify-between gap-2 text-left cursor-pointer group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 text-base font-bold shadow-xs">
+                <i className="fa-solid fa-table-columns" />
+              </div>
+              <div>
+                <h2 className="text-base sm:text-lg font-extrabold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                  Pemetaan Istilah Berdasarkan Program Studi
+                </h2>
+                <span className="text-xs text-slate-500 hidden sm:inline">Tabel perbandingan istilah antarmata kuliah prodi</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5 text-indigo-700 font-bold text-xs bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-200/60">
+              <span>{openSections.table ? 'Sembunyikan' : 'Tampilkan'}</span>
+              <i className={`fa-solid fa-chevron-down text-xs transition-transform duration-200 ${openSections.table ? 'rotate-180' : ''}`} />
+            </div>
+          </button>
+
+          {openSections.table && (
+            <div className="mt-5 pt-4 border-t border-slate-100">
+              <PemetaanTable cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
+            </div>
+          )}
+        </div>
 
         {/* PDF: Halaman 2 — Ringkasan Informatif */}
         <PrintInfoSection cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
