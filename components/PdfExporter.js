@@ -193,6 +193,7 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
         docsList.forEach((doc, di) => {
           const col = di % 2;
           const row = Math.floor(di / 2);
+          const colWidth = 85; // width available per column (2 cols in 180mm box)
           const posX = col === 0 ? 17 : 104;
           const posY = contentY + 7 + (row * 3.6);
 
@@ -200,13 +201,15 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
           if (!/^\d+\.\s*/.test(titleText)) {
             titleText = `${di + 1}. ${titleText}`;
           }
-
           if (doc.sub) {
             titleText += ` (${doc.sub})`;
           }
 
-          const displayStr = titleText.length > 64 ? titleText.substring(0, 62) + '..' : titleText;
-          pdf.text(displayStr, posX, posY);
+          // Auto-wrap text to fit column width (no hardcoded truncation)
+          const wrappedLines = pdf.splitTextToSize(titleText, colWidth);
+          pdf.text(wrappedLines[0] || '', posX, posY);
+          // If there's a second line, render it 2.6mm below
+          if (wrappedLines[1]) pdf.text(wrappedLines[1], posX, posY + 2.6);
         });
       }
 
@@ -221,21 +224,20 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
     pdf.addPage();
     drawKopSurat(`HALAMAN 2: DIAGRAM ALUR UJIAN (${prodiName.toUpperCase()})`);
 
-    const drawDownArrow = (x, yTop, yBottom, labelText = '') => {
+    const drawDownArrow = (x, yTop, yBottom) => {
       pdf.setDrawColor(51, 65, 85);
       pdf.setLineWidth(0.4);
       pdf.line(x, yTop, x, yBottom);
-
       pdf.setFillColor(51, 65, 85);
       pdf.triangle(x - 1.2, yBottom - 2, x + 1.2, yBottom - 2, x, yBottom, 'F');
+    };
 
-      // Pure text label (NO RECTANGLE CONTAINER!)
-      if (labelText) {
-        pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(7.5);
-        pdf.setTextColor(5, 150, 105); // emerald-600
-        pdf.text(labelText, x, ((yTop + yBottom) / 2) + 0.8, { align: 'center' });
-      }
+    // Draw label beside a vertical arrow on the RIGHT side
+    const drawArrowLabel = (x, yTop, yBottom, label, r, g, b) => {
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(7.5);
+      pdf.setTextColor(r, g, b);
+      pdf.text(label, x + 4, ((yTop + yBottom) / 2) + 0.8);
     };
 
     const centerX = 105; // Exact A4 Center Axis
@@ -371,8 +373,9 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
     pdf.setTextColor(127, 29, 29); // red-900
     pdf.text('Ulang: 2. Ujian Proposal', 34, 100, { align: 'center' });
 
-    // BOTTOM BRANCH: YA / LULUS Arrow to Step 4 (PURE TEXT, NO RECTANGLE CONTAINER!)
-    drawDownArrow(centerX, cy + ry, 132, 'YA / Lulus ▼');
+    // BOTTOM BRANCH: YA / LULUS Arrow to Step 4
+    drawDownArrow(centerX, cy + ry, 132);
+    drawArrowLabel(centerX, cy + ry, 132, 'YA / LULUS', 5, 150, 105);
 
     // 4. Process Box 4: Sidang Akhir (Center 105)
     const box4Width = 92;
