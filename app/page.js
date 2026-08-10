@@ -121,6 +121,11 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
 function TimelineCards({ cards, prodiList, activeProdi }) {
   const prodiObj = prodiList.find(p => p.code === activeProdi) || { name: activeProdi.toUpperCase() };
   const validCards = cards.filter(c => !isSkipped(c, activeProdi));
+  const [expandedDocs, setExpandedDocs] = useState({});
+
+  const toggleDocs = (cardId) => {
+    setExpandedDocs(prev => ({ ...prev, [cardId]: !prev[cardId] }));
+  };
 
   return (
     <div className="space-y-4 max-w-3xl mx-auto">
@@ -128,6 +133,7 @@ function TimelineCards({ cards, prodiList, activeProdi }) {
         let docsList = [];
         try { docsList = JSON.parse(card.docs_json || '[]'); } catch (e) {}
         const currentTerm = getProdiTerm(card, activeProdi);
+        const isOpen = !!expandedDocs[card.id];
 
         return (
           <div key={card.id} className="flex flex-col items-center">
@@ -138,19 +144,56 @@ function TimelineCards({ cards, prodiList, activeProdi }) {
               </div>
               <p className="text-xs sm:text-sm text-slate-600 mb-3">{card.description}</p>
 
+              {/* Tombol Collapsible Berkas Persyaratan */}
               {docsList.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 my-3">
-                  {docsList.map((doc, di) => doc.link ? (
-                    <a key={di} href={doc.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 transition-colors text-indigo-900 text-xs font-semibold">
-                      <i className={`fa-solid ${doc.icon || 'fa-file-lines'} text-indigo-600 text-base shrink-0`} />
-                      <div><strong className="block text-indigo-950">{doc.title} <i className="fa-solid fa-link text-[10px]" /></strong><span className="text-indigo-700 font-normal text-[11px]">{doc.sub}</span></div>
-                    </a>
-                  ) : (
-                    <div key={di} className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-800">
-                      <i className={`fa-solid ${doc.icon || 'fa-file-lines'} text-slate-500 text-base shrink-0`} />
-                      <div><strong className="block text-slate-900">{doc.title}</strong><span className="text-slate-500 text-[11px]">{doc.sub}</span></div>
+                <div className="my-2.5">
+                  <button
+                    onClick={() => toggleDocs(card.id)}
+                    className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-blue-50/70 border border-slate-200 hover:border-blue-200 text-slate-800 text-xs font-bold transition-all group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <i className="fa-solid fa-folder-open text-blue-600 text-sm" />
+                      <span>Lihat Berkas Persyaratan ({docsList.length} Items)</span>
                     </div>
-                  ))}
+                    <div className="flex items-center gap-1.5 text-blue-700 font-semibold">
+                      <span className="text-[11px]">{isOpen ? 'Tutup' : 'Tampilkan'}</span>
+                      <i className={`fa-solid fa-chevron-down text-xs transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                    </div>
+                  </button>
+
+                  {/* Isi Accordion Berkas */}
+                  {isOpen && (
+                    <div className="mt-2.5 p-3.5 rounded-xl border border-blue-200/80 bg-blue-50/40 space-y-3">
+                      {/* Banner Ketentuan PDF & GDRIVE MENTORA */}
+                      <div className="flex items-start gap-2.5 text-xs font-medium text-blue-950 bg-blue-100/70 border border-blue-200 rounded-lg p-2.5">
+                        <i className="fa-solid fa-cloud-arrow-up text-blue-600 text-base shrink-0 mt-0.5" />
+                        <div>
+                          <strong className="block text-blue-950 font-bold mb-0.5">Ketentuan Format Berkas:</strong>
+                          <span>*Semua berkas (No. 1 s/d {docsList.length}) disiapkan dalam <strong>format PDF</strong> dan diunggah di <strong>GDRIVE Pendaftaran MENTORA</strong>.</span>
+                          <div className="mt-1">
+                            <a href="https://kpta.sisfoftudinus.my.id/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-blue-700 hover:text-blue-900 underline font-bold text-[11px]">
+                              Portal MENTORA (kpta.sisfoftudinus.my.id) <i className="fa-solid fa-arrow-up-right-from-square text-[9px]" />
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Grid Item Berkas */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {docsList.map((doc, di) => doc.link ? (
+                          <a key={di} href={doc.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-xl border border-indigo-200 bg-white hover:bg-indigo-50 transition-colors text-indigo-900 text-xs font-semibold shadow-sm">
+                            <i className={`fa-solid ${doc.icon || 'fa-file-lines'} text-indigo-600 text-sm shrink-0`} />
+                            <div className="min-w-0 flex-1"><strong className="block text-indigo-950 truncate">{doc.title} <i className="fa-solid fa-link text-[9px]" /></strong><span className="text-indigo-700 font-normal text-[10px] block truncate">{doc.sub}</span></div>
+                          </a>
+                        ) : (
+                          <div key={di} className="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-800 shadow-sm">
+                            <i className={`fa-solid ${doc.icon || 'fa-file-pdf'} text-red-500 text-sm shrink-0`} />
+                            <div className="min-w-0 flex-1"><strong className="block text-slate-900 truncate">{doc.title}</strong><span className="text-slate-500 text-[10px] block truncate">{doc.sub}</span></div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
