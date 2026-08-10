@@ -505,6 +505,8 @@ export default function HomePage() {
             useCORS: true,
             allowTaint: true,
             logging: false,
+            scrollY: 0,
+            windowWidth: 1024
           },
           jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
@@ -516,7 +518,6 @@ export default function HomePage() {
       console.error('html2pdf error:', e);
       window.print();
     } finally {
-      pdfTarget.style.display = 'none';
       setPdfLoading(false);
     }
   }
@@ -669,8 +670,8 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* PDF DIRECT EXPORTER (PURE HEX STYLES - ZERO LAB/OKLCH COLOR ERRORS - EXACT 2 PAGES A4) */}
-        <div id="pdf-export-container" style={{ display: 'none', backgroundColor: '#ffffff', color: '#0f172a', width: '206mm' }}>
+        {/* PDF DIRECT EXPORTER (OFFSCREEN RENDERED - ZERO BLANK PAGES - EXACT 2 PAGES A4) */}
+        <div id="pdf-export-container" style={{ position: 'fixed', left: '-9999px', top: '0', backgroundColor: '#ffffff', color: '#0f172a', width: '206mm', zIndex: -9999 }}>
           {/* HALAMAN 1 */}
           <div style={{ backgroundColor: '#ffffff', color: '#0f172a', width: '206mm', height: '276mm', maxHeight: '276mm', overflow: 'hidden', boxSizing: 'border-box', padding: '8px 10px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', pageBreakAfter: 'always', breakAfter: 'page' }}>
             <div>
