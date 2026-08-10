@@ -75,7 +75,7 @@ function CardModal({ open, editCard, onClose, onSaved, showToast }) {
             <div><label className="block text-xs font-bold text-slate-700 mb-1">No. Urut</label><input type="number" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 outline-none" value={form.step_number} onChange={e => setForm(f => ({ ...f, step_number: e.target.value }))} required min="1" /></div>
             <div><label className="block text-xs font-bold text-slate-700 mb-1">Judul Tahap</label><input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 outline-none" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required /></div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Simbol ANSI</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Bentuk Simbol</label>
               <select className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-blue-500 outline-none" value={form.shape} onChange={e => setForm(f => ({ ...f, shape: e.target.value }))}>
                 <option value="process">Proses (Persegi)</option>
                 <option value="decision">Decision (Belah Ketupat)</option>
@@ -387,7 +387,7 @@ export default function AdminPage() {
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="bg-slate-100 border-b border-slate-200 font-bold text-slate-800">
-                  <th className="p-3.5">No</th><th className="p-3.5">Judul Tahap</th><th className="p-3.5">Simbol ANSI</th><th className="p-3.5">Deskripsi</th>
+                  <th className="p-3.5">No</th><th className="p-3.5">Judul Tahap</th><th className="p-3.5">Bentuk Simbol</th><th className="p-3.5">Deskripsi</th>
                   <th className="p-3.5">Istilah ({activeProdiObj.name})</th><th className="p-3.5">Sub-berkas</th><th className="p-3.5">Catatan</th>
                   <th className="p-3.5 text-right">Aksi</th>
                 </tr>
@@ -439,4 +439,5 @@ function ScrollToTopButton() {
       <i className="fa-solid fa-arrow-up text-xs" />
     </button>
   );
+}
 }

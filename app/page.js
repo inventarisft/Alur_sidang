@@ -16,7 +16,7 @@ function isSkipped(card, prodiCode) {
   return false;
 }
 
-// ===== ANSI FLOWCHART =====
+// ===== FLOWCHART =====
 function AnsiFlowchart({ cards, prodiList, activeProdi }) {
   const prodiObj = prodiList.find(p => p.code === activeProdi) || { name: activeProdi.toUpperCase() };
   const isNote = c => c.shape === 'note';
@@ -31,9 +31,9 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
   });
 
   return (
-    <div className="ansi-flowchart-wrapper flex flex-col items-center gap-2 p-2 sm:p-4 w-full max-w-4xl mx-auto overflow-hidden">
-      <div className="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider mb-2 text-center flex items-center justify-center gap-2">
-        <i className="fa-solid fa-diagram-project text-blue-600" /> Diagram Alur: {prodiObj.name}
+    <div className="flex flex-col items-center gap-2 p-2 sm:p-4 w-full max-w-4xl mx-auto overflow-hidden">
+      <div className="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 text-center flex items-center justify-center gap-2">
+        <i className="fa-solid fa-diagram-project text-blue-600" /> Skema Alur: {prodiObj.name}
       </div>
       {mainCards.map((c, idx) => {
         const isFirst = idx === 0;
@@ -47,7 +47,7 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
         const labelContent = (
           <span className="font-bold">
             {c.title}
-            {prodiTerm && <span className="text-blue-600 font-semibold ml-1">({prodiTerm})</span>}
+            {prodiTerm && <span className="text-blue-600 font-semibold block text-[11px] sm:text-xs mt-0.5">({prodiTerm})</span>}
           </span>
         );
 
@@ -64,7 +64,7 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
 
         return (
           <div key={c.id} className="w-full flex flex-col items-center">
-            <div className="fc-row-with-note flex flex-col sm:flex-row items-center sm:items-start gap-3 w-full max-w-2xl justify-center">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 w-full max-w-2xl justify-center">
               {isTerminal ? (
                 <div className={`px-5 py-2.5 rounded-full font-bold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 shadow-md shrink-0 text-center max-w-full ${isFirst ? 'bg-slate-900 text-slate-50' : 'bg-emerald-800 text-emerald-50'}`}>
                   <i className={`fa-solid ${isFirst ? 'fa-circle-play text-emerald-400' : 'fa-flag-checkered text-amber-300'}`} /> {labelContent}
@@ -110,25 +110,15 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
 
 // ===== TIMELINE CARDS =====
 function TimelineCards({ cards, prodiList, activeProdi }) {
+  const prodiObj = prodiList.find(p => p.code === activeProdi) || { name: activeProdi.toUpperCase() };
   const validCards = cards.filter(c => !isSkipped(c, activeProdi));
+
   return (
     <div className="space-y-4 max-w-3xl mx-auto">
       {validCards.map((card, idx) => {
         let docsList = [];
         try { docsList = JSON.parse(card.docs_json || '[]'); } catch (e) {}
-        const prodiPills = prodiList.map(p => {
-          let term = '';
-          if (p.code === 'te') term = card.te_term;
-          else if (p.code === 'tind') term = card.tind_term;
-          else if (p.code === 'tb') term = card.tb_term;
-          else term = card.te_term || card.title;
-          if (!term) return null;
-          return (
-            <span key={p.code} className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] sm:text-xs rounded-lg border font-bold ${activeProdi === p.code ? 'bg-blue-50 text-blue-700 border-blue-300 shadow-sm' : 'bg-slate-50 text-slate-500 border-slate-200 opacity-60'}`}>
-              <i className={`fa-solid ${p.icon || 'fa-graduation-cap'}`} style={{ color: p.color || '#2563eb' }} /> {p.code.toUpperCase()}: {term}
-            </span>
-          );
-        }).filter(Boolean);
+        const currentTerm = getProdiTerm(card, activeProdi);
 
         return (
           <div key={card.id} className="flex flex-col items-center">
@@ -162,7 +152,14 @@ function TimelineCards({ cards, prodiList, activeProdi }) {
                 </div>
               )}
 
-              {prodiPills.length > 0 && <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-slate-100">{prodiPills}</div>}
+              {currentTerm && (
+                <div className="mt-3 pt-3 border-t border-slate-100">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs rounded-lg border font-bold bg-blue-50 text-blue-700 border-blue-300 shadow-sm">
+                    <i className={`fa-solid ${prodiObj.icon || 'fa-graduation-cap'}`} style={{ color: prodiObj.color || '#2563eb' }} />
+                    {prodiObj.name}: {currentTerm}
+                  </span>
+                </div>
+              )}
             </div>
             {idx < validCards.length - 1 && <div className="text-slate-400 text-base py-1.5"><i className="fa-solid fa-arrow-down" /></div>}
           </div>
@@ -309,6 +306,8 @@ export default function HomePage() {
     window.print();
   }
 
+  const activeProdiObj = prodiList.find(p => p.code === activeProdi) || { name: activeProdi.toUpperCase() };
+
   return (
     <>
       {/* Kop Surat PDF */}
@@ -338,7 +337,7 @@ export default function HomePage() {
             <img src="/img/image-ft.png" alt="Logo FT UDINUS" className="h-12 sm:h-16 w-auto drop-shadow-md" />
           </div>
           <p className="text-center text-xs sm:text-sm text-slate-600 max-w-2xl mx-auto">
-            Panduan alur pendaftaran dan pemetaan istilah ujian Capstone Design (CD) / Project Terpadu (PT) untuk prodi FT Udinus.
+            Panduan alur pendaftaran dan istilah spesifik ujian Capstone Design (CD) / Project Terpadu (PT) Fakultas Teknik UDINUS.
           </p>
         </header>
 
@@ -350,7 +349,7 @@ export default function HomePage() {
                 const iconClass = p.icon || (p.code === 'te' ? 'fa-bolt' : p.code === 'tind' ? 'fa-industry' : p.code === 'tb' ? 'fa-heart-pulse' : 'fa-graduation-cap');
                 const isActive = activeProdi === p.code;
                 return (
-                  <button key={p.code} onClick={() => setActiveProdi(p.code)} className={`inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl transition-all shrink-0 whitespace-nowrap ${isActive ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100/90 text-slate-700 hover:bg-slate-200'}`}>
+                  <button key={p.code} onClick={() => setActiveProdi(p.code)} className={`inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl transition-all shrink-0 whitespace-nowrap ${isActive ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100/90 text-slate-700 hover:bg-slate-200'}`}>
                     <i className={`fa-solid ${iconClass}`} style={{ color: isActive ? '#38bdf8' : (p.color || '#0f172a') }} />
                     <span className="hidden sm:inline">{p.name}</span>
                     <span className="inline sm:hidden uppercase font-extrabold">{p.code}</span>
@@ -370,20 +369,20 @@ export default function HomePage() {
         <div className="no-print mb-12">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-              <i className="fa-solid fa-layer-group text-blue-600" /> Tahapan Alur Pendaftaran Ujian
+              <i className="fa-solid fa-layer-group text-blue-600" /> Tahapan Alur Pendaftaran ({activeProdiObj.name})
             </h2>
-            <span className="text-xs text-slate-500">Pilih prodi untuk melihat istilah spesifik</span>
+            <span className="text-xs text-slate-500">Menampilkan alur spesifik {activeProdiObj.name}</span>
           </div>
           <TimelineCards cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
         </div>
 
-        {/* ANSI Flowchart (web + PDF Halaman 1) */}
+        {/* Flowchart (web + PDF Halaman 1) */}
         <div className="print-page-1 mb-12">
           <div className="flex items-center justify-between mb-4 no-print flex-wrap gap-2">
             <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-              <i className="fa-solid fa-diagram-project text-blue-600" /> Diagram Flowchart Teknik (ANSI Standard)
+              <i className="fa-solid fa-diagram-project text-blue-600" /> Diagram Alur Ujian ({activeProdiObj.name})
             </h2>
-            <span className="text-xs text-slate-500">Skema alur logika &amp; percabangan prodi</span>
+            <span className="text-xs text-slate-500">Skema alur logika &amp; percabangan {activeProdiObj.name}</span>
           </div>
           <AnsiFlowchart cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
         </div>
