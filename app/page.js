@@ -481,7 +481,16 @@ export default function HomePage() {
       return;
     }
 
+    const origStyle = pdfTarget.getAttribute('style') || '';
+
     try {
+      // Pindahkan sementara container ke posisi utama (0,0) agar html2canvas merender piksel secara sempurna
+      pdfTarget.style.position = 'absolute';
+      pdfTarget.style.left = '0px';
+      pdfTarget.style.top = '0px';
+      pdfTarget.style.zIndex = '99999';
+      pdfTarget.style.backgroundColor = '#ffffff';
+      pdfTarget.style.opacity = '1';
       pdfTarget.style.display = 'block';
 
       // Load html2pdf script otomatis dari CDN jika belum dimuat
@@ -506,7 +515,7 @@ export default function HomePage() {
             allowTaint: true,
             logging: false,
             scrollY: 0,
-            windowWidth: 1024
+            scrollX: 0
           },
           jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
@@ -518,6 +527,7 @@ export default function HomePage() {
       console.error('html2pdf error:', e);
       window.print();
     } finally {
+      pdfTarget.setAttribute('style', origStyle);
       setPdfLoading(false);
     }
   }
