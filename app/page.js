@@ -344,7 +344,7 @@ export default function HomePage() {
 
         {/* Sticky Tab Bar */}
         <div className="sticky top-3 z-30 mb-8">
-          <div className="backdrop-blur-md bg-white/90 border border-slate-200 rounded-2xl p-2.5 shadow-lg flex items-center justify-between gap-3 flex-wrap">
+          <div className="backdrop-blur-md bg-white/60 border border-white/60 rounded-2xl p-2.5 shadow-lg shadow-slate-900/5 flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-2 flex-wrap">
               {prodiList.map(p => {
                 const iconClass = p.icon || (p.code === 'te' ? 'fa-bolt' : p.code === 'tind' ? 'fa-industry' : p.code === 'tb' ? 'fa-heart-pulse' : 'fa-graduation-cap');

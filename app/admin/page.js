@@ -357,7 +357,7 @@ export default function AdminPage() {
 
         {/* Sticky Prodi Tabs */}
         <div className="sticky top-4 z-30 mb-6">
-          <div className="backdrop-blur-md bg-white/90 border border-slate-200/80 rounded-2xl p-2 shadow-lg flex gap-1.5 overflow-x-auto">
+          <div className="backdrop-blur-md bg-white/60 border border-white/60 rounded-2xl p-2 shadow-lg shadow-slate-900/5 flex gap-1.5 overflow-x-auto">
             {prodi.map(p => {
               const isActive = activeProdi === p.code;
               return (
