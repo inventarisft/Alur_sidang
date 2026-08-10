@@ -35,7 +35,6 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
   const noteMap = {};
   noteCards.forEach(n => {
     let key = n.step_number;
-    // Jika tidak ada mainCard dengan step_number sama, tempelkan ke step_number sebelumnya
     if (!mainCards.some(mc => mc.step_number === key) && key > 1) {
       key = key - 1;
     }
@@ -299,96 +298,6 @@ function PemetaanTable({ cards, prodiList, activeProdi }) {
   );
 }
 
-// ===== PRINT SECTIONS (PRESISI 2 HALAMAN A4 PORTRAIT) =====
-function PrintPage1Timeline({ cards, prodiList, activeProdi }) {
-  const prodiObj = prodiList.find(p => p.code === activeProdi) || { name: activeProdi.toUpperCase() };
-  const validCards = cards.filter(c => !isSkipped(c, activeProdi));
-
-  return (
-    <div className="pdf-page-1 print-only-section">
-      <div className="print-header">
-        <div className="print-kop-wrapper">
-          <img src="/img/image.png" alt="Logo UDINUS" className="print-logo-left" />
-          <div className="print-kop-text">
-            <h2>UNIVERSITAS DIAN NUSWANTORO</h2>
-            <h3>FAKULTAS TEKNIK</h3>
-            <p>Jl. Nakula I No. 5-11 Semarang | Telp. (024) 3517261 | Website: ft.dinus.ac.id</p>
-            <h4>ALUR PENDAFTARAN UJIAN ({prodiObj.name})</h4>
-          </div>
-          <img src="/img/image-ft.png" alt="Logo FT UDINUS" className="print-logo-right" />
-        </div>
-      </div>
-
-      <div className="text-center font-extrabold text-[9pt] mb-1.5 uppercase tracking-wider text-slate-900 border-b border-black pb-0.5">
-        HALAMAN 1: TAHAPAN ALUR PENDAFTARAN &amp; BERKAS PERSYARATAN ({prodiObj.name})
-      </div>
-
-      <div className="space-y-1">
-        {validCards.map(card => {
-          const prodiTerm = getProdiTerm(card, activeProdi);
-          let docsList = [];
-          try { docsList = JSON.parse(card.docs_json || '[]'); } catch (e) {}
-          const cleanNote = getCleanNote(card.note, activeProdi);
-
-          return (
-            <div key={card.id} className="border border-slate-400 rounded p-1.5 text-[8pt] leading-tight bg-white">
-              <div className="flex justify-between items-center mb-0.5">
-                <strong className="font-bold text-slate-900 text-[8.5pt]">{card.title}</strong>
-                <span className="bg-slate-100 text-slate-900 text-[7.5pt] font-bold px-1.5 py-0.2 rounded border border-slate-300">
-                  Tahap {card.step_number} {prodiTerm ? `— ${prodiTerm}` : ''}
-                </span>
-              </div>
-              <p className="text-slate-700 text-[7.5pt] mb-0.5">{card.description}</p>
-              {cleanNote && <div className="text-blue-900 text-[7pt] italic mb-0.5 font-semibold">ℹ️ {cleanNote}</div>}
-              {docsList.length > 0 && (
-                <div className="bg-slate-50 border border-slate-300 rounded p-1 text-[6.5pt] mt-0.5">
-                  <strong className="block text-slate-900 font-bold mb-0.5">
-                    Berkas Persyaratan (PDF di GDRIVE MENTORA - kpta.sisfoftudinus.my.id):
-                  </strong>
-                  <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
-                    {docsList.map((doc, di) => (
-                      <span key={di} className="truncate text-slate-800 font-medium">
-                        {di + 1}. {doc.title} {doc.sub ? `(${doc.sub})` : ''}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function PrintPage2Flowchart({ cards, prodiList, activeProdi }) {
-  const prodiObj = prodiList.find(p => p.code === activeProdi) || { name: activeProdi.toUpperCase() };
-
-  return (
-    <div className="pdf-page-2 print-only-section">
-      <div className="print-header">
-        <div className="print-kop-wrapper">
-          <img src="/img/image.png" alt="Logo UDINUS" className="print-logo-left" />
-          <div className="print-kop-text">
-            <h2>UNIVERSITAS DIAN NUSWANTORO</h2>
-            <h3>FAKULTAS TEKNIK</h3>
-            <p>Jl. Nakula I No. 5-11 Semarang | Telp. (024) 3517261 | Website: ft.dinus.ac.id</p>
-            <h4>DIAGRAM ALUR LOGIKA UJIAN ({prodiObj.name})</h4>
-          </div>
-          <img src="/img/image-ft.png" alt="Logo FT UDINUS" className="print-logo-right" />
-        </div>
-      </div>
-
-      <div className="text-center font-extrabold text-[9pt] mb-1.5 uppercase tracking-wider text-slate-900 border-b border-black pb-0.5">
-        HALAMAN 2: DIAGRAM ALUR UJIAN ({prodiObj.name})
-      </div>
-
-      <AnsiFlowchart cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
-    </div>
-  );
-}
-
 // ===== SKELETON LOADING COMPONENTS =====
 function TimelineSkeleton() {
   return (
@@ -426,6 +335,7 @@ export default function HomePage() {
   const [prodiList, setProdiList] = useState([]);
   const [activeProdi, setActiveProdi] = useState('te');
   const [loading, setLoading] = useState(true);
+  const [pdfLoading, setPdfLoading] = useState(false);
   const [openSections, setOpenSections] = useState({
     timeline: true,   // Default Terbuka
     flowchart: true,  // Default Terbuka
@@ -458,16 +368,39 @@ export default function HomePage() {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  function handlePdfExport() {
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+  async function handlePdfExport() {
+    setPdfLoading(true);
     const prodiMatch = prodiList.find(p => p.code === activeProdi);
-    const tsEl = document.getElementById('print-timestamp-info');
-    const prEl = document.getElementById('print-prodi-info');
-    if (tsEl) tsEl.textContent = `Dicetak pada: ${dateStr} pukul ${timeStr} WIB`;
-    if (prEl) prEl.textContent = `Program Studi: ${prodiMatch ? prodiMatch.name : activeProdi.toUpperCase()}`;
-    window.print();
+    const pdfTarget = document.getElementById('pdf-export-container');
+
+    if (!pdfTarget) {
+      window.print();
+      setPdfLoading(false);
+      return;
+    }
+
+    try {
+      pdfTarget.style.display = 'block';
+
+      if (typeof window !== 'undefined' && window.html2pdf) {
+        const opt = {
+          margin:       [3, 4, 3, 4], // mm top, left, bottom, right (tanpa buang space!)
+          filename:     `Alur_Ujian_${(prodiMatch?.code || activeProdi).toUpperCase()}_UDINUS.pdf`,
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true, logging: false },
+          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        await window.html2pdf().set(opt).from(pdfTarget).save();
+      } else {
+        window.print();
+      }
+    } catch (e) {
+      console.error('html2pdf error:', e);
+      window.print();
+    } finally {
+      pdfTarget.style.display = 'none';
+      setPdfLoading(false);
+    }
   }
 
   const activeProdiObj = prodiList.find(p => p.code === activeProdi) || { name: activeProdi.toUpperCase() };
@@ -507,10 +440,23 @@ export default function HomePage() {
                 );
               })}
             </div>
-            <button onClick={handlePdfExport} className="no-print inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-all shrink-0 whitespace-nowrap cursor-pointer">
-              <i className="fa-solid fa-file-pdf" />
-              <span className="hidden sm:inline">Unduh / Cetak PDF</span>
-              <span className="inline sm:hidden">PDF</span>
+            <button
+              onClick={handlePdfExport}
+              disabled={pdfLoading}
+              className="no-print inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white shadow-md transition-all shrink-0 whitespace-nowrap cursor-pointer disabled:opacity-50"
+            >
+              {pdfLoading ? (
+                <>
+                  <i className="fa-solid fa-spinner animate-spin" />
+                  <span>Mengunduh...</span>
+                </>
+              ) : (
+                <>
+                  <i className="fa-solid fa-file-pdf" />
+                  <span className="hidden sm:inline">Unduh PDF (2 Hal)</span>
+                  <span className="inline sm:hidden">PDF</span>
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -605,16 +551,88 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* PDF EXPORT SECTIONS: EXACT 2 PAGES A4 PORTRAIT */}
-        <PrintPage1Timeline cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
-        <PrintPage2Flowchart cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
+        {/* PDF DIRECT GENERATOR CONTAINER (EXACT 2 PAGES A4 PORTRAIT, OPTIMAL MARGINS) */}
+        <div id="pdf-export-container" style={{ display: 'none' }} className="bg-white text-black p-0 m-0">
+          {/* HALAMAN 1 */}
+          <div className="bg-white p-2 text-black" style={{ pageBreakAfter: 'always', breakAfter: 'page' }}>
+            <div className="border-b-2 border-black pb-2 mb-2">
+              <div className="flex items-center justify-between gap-4">
+                <img src="/img/image.png" alt="Logo UDINUS" className="h-10 w-auto" />
+                <div className="text-center flex-1">
+                  <h2 className="text-sm font-bold m-0 p-0">UNIVERSITAS DIAN NUSWANTORO</h2>
+                  <h3 className="text-xs font-bold m-0 p-0">FAKULTAS TEKNIK</h3>
+                  <p className="text-[7.5pt] m-0 p-0">Jl. Nakula I No. 5-11 Semarang | Telp. (024) 3517261 | Website: ft.dinus.ac.id</p>
+                  <h4 className="text-[8.5pt] font-bold uppercase m-0 pt-0.5 border-t border-black inline-block">
+                    ALUR PENDAFTARAN UJIAN ({activeProdiObj.name})
+                  </h4>
+                </div>
+                <img src="/img/image-ft.png" alt="Logo FT UDINUS" className="h-10 w-auto" />
+              </div>
+            </div>
 
-        {/* Print Footer */}
-        <div className="print-footer">
-          <div className="flex justify-between text-[9px] border-t border-black pt-1">
-            <span id="print-timestamp-info">Dicetak pada: -</span>
-            <span id="print-prodi-info">Program Studi: -</span>
-            <span>Dokumen Resmi Fakultas Teknik UDINUS</span>
+            <div className="text-center font-extrabold text-[8.5pt] mb-1.5 uppercase tracking-wider text-slate-900 border-b border-black pb-0.5">
+              HALAMAN 1: TAHAPAN ALUR PENDAFTARAN &amp; BERKAS PERSYARATAN ({activeProdiObj.name})
+            </div>
+
+            <div className="space-y-1">
+              {cards.filter(c => !isSkipped(c, activeProdi)).map(card => {
+                const prodiTerm = getProdiTerm(card, activeProdi);
+                let docsList = [];
+                try { docsList = JSON.parse(card.docs_json || '[]'); } catch (e) {}
+                const cleanNote = getCleanNote(card.note, activeProdi);
+
+                return (
+                  <div key={card.id} className="border border-slate-400 rounded p-1.5 text-[7.5pt] leading-tight bg-white">
+                    <div className="flex justify-between items-center mb-0.5">
+                      <strong className="font-bold text-slate-900 text-[8pt]">{card.title}</strong>
+                      <span className="bg-slate-100 text-slate-900 text-[7pt] font-bold px-1.5 py-0.2 rounded border border-slate-300">
+                        Tahap {card.step_number} {prodiTerm ? `— ${prodiTerm}` : ''}
+                      </span>
+                    </div>
+                    <p className="text-slate-700 text-[7pt] mb-0.5">{card.description}</p>
+                    {cleanNote && <div className="text-blue-900 text-[6.5pt] italic mb-0.5 font-semibold">ℹ️ {cleanNote}</div>}
+                    {docsList.length > 0 && (
+                      <div className="bg-slate-50 border border-slate-300 rounded p-1 text-[6.5pt] mt-0.5">
+                        <strong className="block text-slate-900 font-bold mb-0.5">
+                          Berkas Persyaratan (PDF MENTORA - kpta.sisfoftudinus.my.id):
+                        </strong>
+                        <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+                          {docsList.map((doc, di) => (
+                            <span key={di} className="truncate text-slate-800 font-medium">
+                              {di + 1}. {doc.title} {doc.sub ? `(${doc.sub})` : ''}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* HALAMAN 2 */}
+          <div className="bg-white p-2 text-black" style={{ pageBreakAfter: 'avoid', breakAfter: 'avoid' }}>
+            <div className="border-b-2 border-black pb-2 mb-2">
+              <div className="flex items-center justify-between gap-4">
+                <img src="/img/image.png" alt="Logo UDINUS" className="h-10 w-auto" />
+                <div className="text-center flex-1">
+                  <h2 className="text-sm font-bold m-0 p-0">UNIVERSITAS DIAN NUSWANTORO</h2>
+                  <h3 className="text-xs font-bold m-0 p-0">FAKULTAS TEKNIK</h3>
+                  <p className="text-[7.5pt] m-0 p-0">Jl. Nakula I No. 5-11 Semarang | Telp. (024) 3517261 | Website: ft.dinus.ac.id</p>
+                  <h4 className="text-[8.5pt] font-bold uppercase m-0 pt-0.5 border-t border-black inline-block">
+                    DIAGRAM ALUR LOGIKA UJIAN ({activeProdiObj.name})
+                  </h4>
+                </div>
+                <img src="/img/image-ft.png" alt="Logo FT UDINUS" className="h-10 w-auto" />
+              </div>
+            </div>
+
+            <div className="text-center font-extrabold text-[8.5pt] mb-1.5 uppercase tracking-wider text-slate-900 border-b border-black pb-0.5">
+              HALAMAN 2: DIAGRAM ALUR UJIAN ({activeProdiObj.name})
+            </div>
+
+            <AnsiFlowchart cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
           </div>
         </div>
 
