@@ -112,60 +112,89 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
       let docsList = [];
       try { docsList = JSON.parse(card.docs_json || '[]'); } catch (e) {}
 
+      // Pre-calculate wrapped lines for each doc item
+      const colWidth = 82;
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(5.8);
+      const docsWrapped = docsList.map((doc, di) => {
+        let titleText = (doc.title || '').trim();
+        if (!/^\d+\.\s*/.test(titleText)) titleText = `${di + 1}. ${titleText}`;
+        if (doc.sub) titleText += ` (${doc.sub})`;
+        return pdf.splitTextToSize(titleText, colWidth);
+      });
+
+      // Calculate docs box height: row height depends on whether any item in that row wraps
+      let docsHeight = 0;
+      if (docsList.length > 0) {
+        const rows = Math.ceil(docsList.length / 2);
+        let dynamicDocsH = 6; // header label
+        for (let r = 0; r < rows; r++) {
+          const leftItem = docsWrapped[r * 2];
+          const rightItem = docsWrapped[r * 2 + 1];
+          const maxLines = Math.max(
+            leftItem ? leftItem.length : 0,
+            rightItem ? rightItem.length : 0
+          );
+          dynamicDocsH += maxLines <= 1 ? 3.6 : 3.6 + (maxLines - 1) * 2.8;
+        }
+        docsHeight = dynamicDocsH + 1;
+      }
+
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(8.5);
       const descLines = pdf.splitTextToSize(card.description || '', 178);
       const descHeight = descLines.length * 3.2;
 
       let noteLines = [];
       let noteHeight = 0;
       if (cleanNote) {
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(6.3);
         noteLines = pdf.splitTextToSize(`i  ${cleanNote}`, 174);
-        noteHeight = 2 + (noteLines.length * 3.0);
+        noteHeight = 3 + (noteLines.length * 3.0);
       }
 
-      let docsHeight = 0;
-      if (docsList.length > 0) {
-        const rows = Math.ceil(docsList.length / 2);
-        docsHeight = 6 + (rows * 3.6);
-      }
-
-      const totalCardHeight = 6 + descHeight + noteHeight + docsHeight + 2;
+      const totalCardHeight = 7 + descHeight + noteHeight + docsHeight + 2;
 
       pdf.setFillColor(255, 255, 255);
       pdf.setDrawColor(148, 163, 184);
       pdf.setLineWidth(0.3);
       pdf.roundedRect(12, curY, 186, totalCardHeight, 1.5, 1.5, 'FD');
 
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(8.5);
-      pdf.setTextColor(15, 23, 42);
-      pdf.text(card.title, 15, curY + 4.5);
-
+      // Badge first (so we know its width), then title clipped to not overlap
       const badgeText = `Tahap ${card.step_number}${prodiTerm ? ` — ${prodiTerm}` : ''}`;
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(7);
-      const badgeWidth = pdf.getTextWidth(badgeText) + 5;
+      const badgeWidth = pdf.getTextWidth(badgeText) + 6;
+      const badgeLeft = 196 - badgeWidth;
 
       pdf.setFillColor(241, 245, 249);
       pdf.setDrawColor(203, 213, 225);
-      pdf.roundedRect(195 - badgeWidth, curY + 1.5, badgeWidth, 4.5, 1, 1, 'FD');
-
+      pdf.roundedRect(badgeLeft, curY + 1.5, badgeWidth, 5, 1, 1, 'FD');
       pdf.setTextColor(15, 23, 42);
-      pdf.text(badgeText, 195 - (badgeWidth / 2), curY + 4.7, { align: 'center' });
+      pdf.text(badgeText, badgeLeft + badgeWidth / 2, curY + 5, { align: 'center' });
 
-      let contentY = curY + 8;
+      // Title clipped to available width left of badge
+      const titleMaxWidth = badgeLeft - 17;
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(8.5);
+      pdf.setTextColor(15, 23, 42);
+      const titleLines = pdf.splitTextToSize(card.title, titleMaxWidth);
+      pdf.text(titleLines[0], 15, curY + 5);
+
+      let contentY = curY + 9;
       if (descLines.length > 0) {
         pdf.setFont('helvetica', 'normal');
         pdf.setFontSize(7.2);
         pdf.setTextColor(51, 65, 85);
         pdf.text(descLines, 15, contentY);
-        contentY += descHeight;
+        contentY += descHeight + 1;
       }
 
       if (cleanNote) {
         pdf.setFillColor(239, 246, 255);
         pdf.setDrawColor(191, 219, 254);
         pdf.roundedRect(15, contentY - 1, 180, noteHeight, 1, 1, 'FD');
-
         pdf.setFont('helvetica', 'bold');
         pdf.setFontSize(6.3);
         pdf.setTextColor(30, 58, 138);
@@ -174,15 +203,13 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
       }
 
       if (docsList.length > 0) {
-        const rows = Math.ceil(docsList.length / 2);
-        const docsBoxHeight = 4.5 + (rows * 3.6);
-
+        const docsBoxH = docsHeight;
         pdf.setFillColor(248, 250, 252);
         pdf.setDrawColor(203, 213, 225);
-        pdf.roundedRect(15, contentY, 180, docsBoxHeight, 1, 1, 'FD');
+        pdf.roundedRect(15, contentY, 180, docsBoxH, 1, 1, 'FD');
 
         pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(6.8);
+        pdf.setFontSize(6.5);
         pdf.setTextColor(15, 23, 42);
         pdf.text('Berkas Persyaratan (PDF MENTORA - kpta.sisfoftudinus.my.id):', 17, contentY + 3.5);
 
@@ -190,27 +217,18 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
         pdf.setFontSize(5.8);
         pdf.setTextColor(30, 41, 59);
 
-        docsList.forEach((doc, di) => {
-          const col = di % 2;
-          const row = Math.floor(di / 2);
-          const colWidth = 85; // width available per column (2 cols in 180mm box)
-          const posX = col === 0 ? 17 : 104;
-          const posY = contentY + 7 + (row * 3.6);
+        const rows = Math.ceil(docsList.length / 2);
+        let rowY = contentY + 6.5;
+        for (let r = 0; r < rows; r++) {
+          const leftLines = docsWrapped[r * 2] || [];
+          const rightLines = docsWrapped[r * 2 + 1] || [];
+          const maxLines = Math.max(leftLines.length, rightLines.length);
 
-          let titleText = (doc.title || '').trim();
-          if (!/^\d+\.\s*/.test(titleText)) {
-            titleText = `${di + 1}. ${titleText}`;
-          }
-          if (doc.sub) {
-            titleText += ` (${doc.sub})`;
-          }
+          leftLines.forEach((line, li) => pdf.text(line, 17, rowY + li * 2.8));
+          rightLines.forEach((line, li) => pdf.text(line, 104, rowY + li * 2.8));
 
-          // Auto-wrap text to fit column width (no hardcoded truncation)
-          const wrappedLines = pdf.splitTextToSize(titleText, colWidth);
-          pdf.text(wrappedLines[0] || '', posX, posY);
-          // If there's a second line, render it 2.6mm below
-          if (wrappedLines[1]) pdf.text(wrappedLines[1], posX, posY + 2.6);
-        });
+          rowY += maxLines <= 1 ? 3.6 : 3.6 + (maxLines - 1) * 2.8;
+        }
       }
 
       curY += totalCardHeight + 2.5;
@@ -363,15 +381,15 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
     pdf.setFillColor(220, 38, 38);
     pdf.triangle(box2Left - 2, 73.3, box2Left - 2, 75.7, box2Left, 74.5, 'F');
 
-    // Label Text for TIDAK / GAGAL (PURE TEXT, NO RECTANGLE CONTAINER!)
+    // Label Text for TIDAK / GAGAL - positioned to the RIGHT of vertical red line (x=25)
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(7.5);
+    pdf.setFontSize(7);
     pdf.setTextColor(185, 28, 28); // red-700
-    pdf.text('TIDAK / GAGAL', 34, 96, { align: 'center' });
+    pdf.text('TIDAK / GAGAL', 27, 101);
     pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(6.3);
+    pdf.setFontSize(6);
     pdf.setTextColor(127, 29, 29); // red-900
-    pdf.text('Ulang: 2. Ujian Proposal', 34, 100, { align: 'center' });
+    pdf.text('Ulang ke Ujian Proposal', 27, 105);
 
     // BOTTOM BRANCH: YA / LULUS Arrow to Step 4
     drawDownArrow(centerX, cy + ry, 132);
