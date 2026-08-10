@@ -11,6 +11,7 @@ function getProdiTerm(card, prodiCode) {
 }
 
 function isSkipped(card, prodiCode) {
+  if ((card.title || '').toLowerCase().includes('informatika')) return true;
   if (card.skip_tind && prodiCode === 'tind') return true;
   return false;
 }
@@ -237,7 +238,7 @@ function PemetaanTable({ cards, prodiList, activeProdi }) {
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-200">
-          {cards.map(item => (
+          {cards.filter(item => !isSkipped(item, activeProdi)).map(item => (
             <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
               <td className="p-3.5 font-bold text-slate-900 whitespace-nowrap">{item.title}</td>
               {prodiList.map(p => {
