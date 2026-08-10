@@ -409,6 +409,34 @@ export default function AdminPage() {
           <p>&copy; 2026 Universitas Dian Nuswantoro (UDINUS) — Panel Kontrol Manajemen</p>
         </footer>
       </div>
+
+      <ScrollToTopButton />
     </>
+  );
+}
+
+function ScrollToTopButton() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const toggleVisible = () => {
+      if (window.scrollY > 250) setVisible(true);
+      else setVisible(false);
+    };
+    window.addEventListener('scroll', toggleVisible);
+    return () => window.removeEventListener('scroll', toggleVisible);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <button
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      className="fixed bottom-5 right-5 z-40 w-10 h-10 rounded-full bg-slate-900/85 hover:bg-slate-900 text-white border border-white/20 shadow-lg backdrop-blur-md flex items-center justify-center transition-all hover:scale-110 active:scale-95 cursor-pointer"
+      title="Kembali ke Atas"
+      aria-label="Kembali ke Atas"
+    >
+      <i className="fa-solid fa-arrow-up text-xs" />
+    </button>
   );
 }
