@@ -43,8 +43,8 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
   });
 
   return (
-    <div className="flex flex-col items-center gap-1.5 sm:gap-2 p-1 sm:p-4 w-full max-w-4xl mx-auto overflow-hidden">
-      <div className="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider mb-2 text-center flex items-center justify-center gap-2 no-print">
+    <div className="flex flex-col items-center gap-1 sm:gap-2 p-1 sm:p-4 w-full max-w-4xl mx-auto overflow-hidden">
+      <div className="text-xs sm:text-sm font-bold text-slate-800 uppercase tracking-wider mb-1 text-center flex items-center justify-center gap-2 no-print">
         <i className="fa-solid fa-diagram-project text-blue-600" /> Skema Alur: {prodiObj.name}
       </div>
       {mainCards.map((c, idx) => {
@@ -374,7 +374,6 @@ export default function HomePage() {
     const pdfTarget = document.getElementById('pdf-export-container');
 
     if (!pdfTarget) {
-      window.print();
       setPdfLoading(false);
       return;
     }
@@ -382,21 +381,21 @@ export default function HomePage() {
     try {
       pdfTarget.style.display = 'block';
 
-      if (typeof window !== 'undefined' && window.html2pdf) {
-        const opt = {
-          margin:       [3, 4, 3, 4], // mm top, left, bottom, right (tanpa buang space!)
-          filename:     `Alur_Ujian_${(prodiMatch?.code || activeProdi).toUpperCase()}_UDINUS.pdf`,
-          image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  { scale: 2, useCORS: true, logging: false },
-          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-        await window.html2pdf().set(opt).from(pdfTarget).save();
-      } else {
-        window.print();
-      }
+      // Import html2pdf.js secara langsung dari node_modules
+      const html2pdf = (await import('html2pdf.js')).default;
+
+      const opt = {
+        margin:       [2, 4, 2, 4], // mm top, left, bottom, right (tanpa buang space)
+        filename:     `Alur_Ujian_${(prodiMatch?.code || activeProdi).toUpperCase()}_UDINUS.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      await html2pdf().set(opt).from(pdfTarget).save();
     } catch (e) {
       console.error('html2pdf error:', e);
-      window.print();
+      alert('Gagal membuat PDF: ' + e.message);
     } finally {
       pdfTarget.style.display = 'none';
       setPdfLoading(false);
@@ -551,88 +550,110 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* PDF DIRECT GENERATOR CONTAINER (EXACT 2 PAGES A4 PORTRAIT, OPTIMAL MARGINS) */}
-        <div id="pdf-export-container" style={{ display: 'none' }} className="bg-white text-black p-0 m-0">
+        {/* PDF DIRECT EXPORTER (EXACT 2 PAGES A4 PORTRAIT, ZERO OVERFLOW) */}
+        <div id="pdf-export-container" style={{ display: 'none' }} className="bg-white text-black p-0 m-0 w-[210mm]">
           {/* HALAMAN 1 */}
-          <div className="bg-white p-2 text-black" style={{ pageBreakAfter: 'always', breakAfter: 'page' }}>
-            <div className="border-b-2 border-black pb-2 mb-2">
-              <div className="flex items-center justify-between gap-4">
-                <img src="/img/image.png" alt="Logo UDINUS" className="h-10 w-auto" />
-                <div className="text-center flex-1">
-                  <h2 className="text-sm font-bold m-0 p-0">UNIVERSITAS DIAN NUSWANTORO</h2>
-                  <h3 className="text-xs font-bold m-0 p-0">FAKULTAS TEKNIK</h3>
-                  <p className="text-[7.5pt] m-0 p-0">Jl. Nakula I No. 5-11 Semarang | Telp. (024) 3517261 | Website: ft.dinus.ac.id</p>
-                  <h4 className="text-[8.5pt] font-bold uppercase m-0 pt-0.5 border-t border-black inline-block">
-                    ALUR PENDAFTARAN UJIAN ({activeProdiObj.name})
-                  </h4>
+          <div className="bg-white px-3 py-2 text-black w-[210mm] h-[280mm] max-h-[280mm] overflow-hidden box-border relative flex flex-col justify-between" style={{ pageBreakAfter: 'always', breakAfter: 'page' }}>
+            <div>
+              {/* KOP SURAT */}
+              <div className="border-b-2 border-black pb-1 mb-1.5">
+                <div className="flex items-center justify-between gap-3">
+                  <img src="/img/image.png" alt="Logo UDINUS" className="h-8 w-auto" />
+                  <div className="text-center flex-1">
+                    <h2 className="text-[9.5pt] font-bold leading-none m-0">UNIVERSITAS DIAN NUSWANTORO</h2>
+                    <h3 className="text-[8pt] font-bold leading-tight m-0">FAKULTAS TEKNIK</h3>
+                    <p className="text-[6pt] m-0 leading-tight">Jl. Nakula I No. 5-11 Semarang | Telp. (024) 3517261 | Website: ft.dinus.ac.id</p>
+                    <h4 className="text-[7pt] font-bold uppercase m-0 pt-0.5 border-t border-black inline-block">
+                      ALUR PENDAFTARAN UJIAN ({activeProdiObj.name})
+                    </h4>
+                  </div>
+                  <img src="/img/image-ft.png" alt="Logo FT UDINUS" className="h-8 w-auto" />
                 </div>
-                <img src="/img/image-ft.png" alt="Logo FT UDINUS" className="h-10 w-auto" />
+              </div>
+
+              <div className="text-center font-extrabold text-[7.5pt] mb-1 uppercase tracking-wider text-slate-900 border-b border-black pb-0.5">
+                HALAMAN 1: TAHAPAN ALUR PENDAFTARAN &amp; BERKAS PERSYARATAN ({activeProdiObj.name})
+              </div>
+
+              {/* 7 STAGE CARDS */}
+              <div className="space-y-0.5">
+                {cards.filter(c => !isSkipped(c, activeProdi)).map(card => {
+                  const prodiTerm = getProdiTerm(card, activeProdi);
+                  let docsList = [];
+                  try { docsList = JSON.parse(card.docs_json || '[]'); } catch (e) {}
+                  const cleanNote = getCleanNote(card.note, activeProdi);
+
+                  return (
+                    <div key={card.id} className="border border-slate-400 rounded p-1 text-[6.5pt] leading-tight bg-white">
+                      <div className="flex justify-between items-center mb-0.5">
+                        <strong className="font-bold text-slate-900 text-[7pt]">{card.title}</strong>
+                        <span className="bg-slate-100 text-slate-900 text-[6pt] font-bold px-1 py-0.1 rounded border border-slate-300">
+                          Tahap {card.step_number} {prodiTerm ? `— ${prodiTerm}` : ''}
+                        </span>
+                      </div>
+                      <p className="text-slate-700 text-[6pt] mb-0.5">{card.description}</p>
+                      {cleanNote && <div className="text-blue-900 text-[5.5pt] italic mb-0.5 font-semibold">ℹ️ {cleanNote}</div>}
+                      {docsList.length > 0 && (
+                        <div className="bg-slate-50 border border-slate-300 rounded p-0.5 text-[5.5pt] mt-0.5">
+                          <strong className="block text-slate-900 font-bold mb-0.5">
+                            Berkas Persyaratan (PDF MENTORA - kpta.sisfoftudinus.my.id):
+                          </strong>
+                          <div className="grid grid-cols-2 gap-x-2 gap-y-0.2">
+                            {docsList.map((doc, di) => (
+                              <span key={di} className="truncate text-slate-800 font-medium">
+                                {di + 1}. {doc.title} {doc.sub ? `(${doc.sub})` : ''}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            <div className="text-center font-extrabold text-[8.5pt] mb-1.5 uppercase tracking-wider text-slate-900 border-b border-black pb-0.5">
-              HALAMAN 1: TAHAPAN ALUR PENDAFTARAN &amp; BERKAS PERSYARATAN ({activeProdiObj.name})
-            </div>
-
-            <div className="space-y-1">
-              {cards.filter(c => !isSkipped(c, activeProdi)).map(card => {
-                const prodiTerm = getProdiTerm(card, activeProdi);
-                let docsList = [];
-                try { docsList = JSON.parse(card.docs_json || '[]'); } catch (e) {}
-                const cleanNote = getCleanNote(card.note, activeProdi);
-
-                return (
-                  <div key={card.id} className="border border-slate-400 rounded p-1.5 text-[7.5pt] leading-tight bg-white">
-                    <div className="flex justify-between items-center mb-0.5">
-                      <strong className="font-bold text-slate-900 text-[8pt]">{card.title}</strong>
-                      <span className="bg-slate-100 text-slate-900 text-[7pt] font-bold px-1.5 py-0.2 rounded border border-slate-300">
-                        Tahap {card.step_number} {prodiTerm ? `— ${prodiTerm}` : ''}
-                      </span>
-                    </div>
-                    <p className="text-slate-700 text-[7pt] mb-0.5">{card.description}</p>
-                    {cleanNote && <div className="text-blue-900 text-[6.5pt] italic mb-0.5 font-semibold">ℹ️ {cleanNote}</div>}
-                    {docsList.length > 0 && (
-                      <div className="bg-slate-50 border border-slate-300 rounded p-1 text-[6.5pt] mt-0.5">
-                        <strong className="block text-slate-900 font-bold mb-0.5">
-                          Berkas Persyaratan (PDF MENTORA - kpta.sisfoftudinus.my.id):
-                        </strong>
-                        <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
-                          {docsList.map((doc, di) => (
-                            <span key={di} className="truncate text-slate-800 font-medium">
-                              {di + 1}. {doc.title} {doc.sub ? `(${doc.sub})` : ''}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+            {/* FOOTER HALAMAN 1 */}
+            <div className="border-t border-black pt-0.5 text-[6.5pt] flex justify-between text-slate-700">
+              <span>Dokumen Resmi Alur Ujian Fakultas Teknik UDINUS</span>
+              <span>Halaman 1 dari 2</span>
             </div>
           </div>
 
           {/* HALAMAN 2 */}
-          <div className="bg-white p-2 text-black" style={{ pageBreakAfter: 'avoid', breakAfter: 'avoid' }}>
-            <div className="border-b-2 border-black pb-2 mb-2">
-              <div className="flex items-center justify-between gap-4">
-                <img src="/img/image.png" alt="Logo UDINUS" className="h-10 w-auto" />
-                <div className="text-center flex-1">
-                  <h2 className="text-sm font-bold m-0 p-0">UNIVERSITAS DIAN NUSWANTORO</h2>
-                  <h3 className="text-xs font-bold m-0 p-0">FAKULTAS TEKNIK</h3>
-                  <p className="text-[7.5pt] m-0 p-0">Jl. Nakula I No. 5-11 Semarang | Telp. (024) 3517261 | Website: ft.dinus.ac.id</p>
-                  <h4 className="text-[8.5pt] font-bold uppercase m-0 pt-0.5 border-t border-black inline-block">
-                    DIAGRAM ALUR LOGIKA UJIAN ({activeProdiObj.name})
-                  </h4>
+          <div className="bg-white px-3 py-2 text-black w-[210mm] h-[280mm] max-h-[280mm] overflow-hidden box-border relative flex flex-col justify-between" style={{ pageBreakAfter: 'avoid', breakAfter: 'avoid' }}>
+            <div>
+              {/* KOP SURAT */}
+              <div className="border-b-2 border-black pb-1 mb-1.5">
+                <div className="flex items-center justify-between gap-3">
+                  <img src="/img/image.png" alt="Logo UDINUS" className="h-8 w-auto" />
+                  <div className="text-center flex-1">
+                    <h2 className="text-[9.5pt] font-bold leading-none m-0">UNIVERSITAS DIAN NUSWANTORO</h2>
+                    <h3 className="text-[8pt] font-bold leading-tight m-0">FAKULTAS TEKNIK</h3>
+                    <p className="text-[6pt] m-0 leading-tight">Jl. Nakula I No. 5-11 Semarang | Telp. (024) 3517261 | Website: ft.dinus.ac.id</p>
+                    <h4 className="text-[7pt] font-bold uppercase m-0 pt-0.5 border-t border-black inline-block">
+                      DIAGRAM ALUR LOGIKA UJIAN ({activeProdiObj.name})
+                    </h4>
+                  </div>
+                  <img src="/img/image-ft.png" alt="Logo FT UDINUS" className="h-8 w-auto" />
                 </div>
-                <img src="/img/image-ft.png" alt="Logo FT UDINUS" className="h-10 w-auto" />
+              </div>
+
+              <div className="text-center font-extrabold text-[7.5pt] mb-1 uppercase tracking-wider text-slate-900 border-b border-black pb-0.5">
+                HALAMAN 2: DIAGRAM ALUR UJIAN ({activeProdiObj.name})
+              </div>
+
+              {/* FLOWCHART (SCALED PROPORTIONALLY TO FIT PAGE 2) */}
+              <div className="transform scale-[0.76] origin-top -mb-20">
+                <AnsiFlowchart cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
               </div>
             </div>
 
-            <div className="text-center font-extrabold text-[8.5pt] mb-1.5 uppercase tracking-wider text-slate-900 border-b border-black pb-0.5">
-              HALAMAN 2: DIAGRAM ALUR UJIAN ({activeProdiObj.name})
+            {/* FOOTER HALAMAN 2 */}
+            <div className="border-t border-black pt-0.5 text-[6.5pt] flex justify-between text-slate-700">
+              <span>Dokumen Resmi Alur Ujian Fakultas Teknik UDINUS</span>
+              <span>Halaman 2 dari 2</span>
             </div>
-
-            <AnsiFlowchart cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
           </div>
         </div>
 
