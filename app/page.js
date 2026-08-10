@@ -96,37 +96,32 @@ function AnsiFlowchart({ cards, prodiList, activeProdi }) {
                   )}
                 </div>
               ) : isDecision ? (
-                <div className="flex flex-col items-center w-full max-w-lg relative">
-                  {/* Belah Ketupat */}
-                  <div className="w-28 h-28 sm:w-36 sm:h-36 bg-amber-50 border-2 border-amber-600 rotate-45 flex items-center justify-center my-3 shadow-xs shrink-0 relative">
-                    <div className="-rotate-45 text-center text-[9px] sm:text-xs font-extrabold text-amber-950 p-1.5 leading-tight max-w-[85px] sm:max-w-[100px] break-words">
-                      {labelContent}
-                    </div>
-                  </div>
-
-                  {/* Cabang Percabangan TIDAK & YA */}
-                  <div className="w-full flex justify-between items-center max-w-md px-1 sm:px-4 -mt-2 mb-2 gap-2">
-                    {/* Cabang TIDAK / GAGAL — Ulang ke Atas */}
-                    <div className="flex items-center gap-1.5 bg-red-50 border border-red-300 rounded-xl px-2.5 py-1.5 text-red-950 text-[9.5px] sm:text-xs font-bold shadow-xs flex-1 max-w-[200px]">
-                      <i className="fa-solid fa-arrow-turn-up text-red-600 text-base shrink-0 transform -scale-x-100" />
+                <div className="flex flex-col items-center w-full max-w-xl my-1 sm:my-2 relative">
+                  {/* Container Belah Ketupat & Cabang Kiri */}
+                  <div className="flex items-center justify-center w-full relative min-h-[130px] sm:min-h-[160px]">
+                    {/* SISI KIRI: CABANG TIDAK / GAGAL */}
+                    <div className="absolute left-0 sm:left-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 bg-red-50 border border-red-300 rounded-xl p-2 sm:p-2.5 text-red-950 text-xs font-bold shadow-xs max-w-[140px] sm:max-w-[190px] z-10">
+                      <i className="fa-solid fa-arrow-turn-up text-red-600 text-sm sm:text-base shrink-0 transform -scale-x-100" />
                       <div className="leading-tight">
-                        <span className="block text-red-700 font-extrabold text-[9px] sm:text-[10px] uppercase">TIDAK / Gagal</span>
-                        <span className="text-[8.5px] sm:text-[10px] text-red-900 font-semibold block truncate">Ulang: {prevCard ? prevCard.title : 'Proses Sebelumnya'}</span>
+                        <span className="block text-red-700 font-extrabold text-[8.5px] sm:text-[10px] uppercase">TIDAK / Gagal</span>
+                        <span className="text-[8px] sm:text-[10px] text-red-900 font-semibold block truncate">Ulang: {prevCard ? prevCard.title : 'Proses Sebelumnya'}</span>
                       </div>
                     </div>
 
-                    {/* Cabang YA / LULUS — Lanjut ke Bawah */}
-                    <div className="flex items-center justify-end gap-1.5 bg-emerald-50 border border-emerald-300 rounded-xl px-2.5 py-1.5 text-emerald-950 text-[9.5px] sm:text-xs font-bold shadow-xs flex-1 max-w-[200px] text-right">
-                      <div className="leading-tight">
-                        <span className="block text-emerald-800 font-extrabold text-[9px] sm:text-[10px] uppercase">YA / Lulus</span>
-                        <span className="text-[8.5px] sm:text-[10px] text-emerald-900 font-semibold block">Lanjut ke Sidang</span>
+                    {/* BELAH KETUPAT (DI TENGAH) */}
+                    <div className="w-28 h-28 sm:w-36 sm:h-36 bg-amber-50 border-2 border-amber-600 rotate-45 flex items-center justify-center shadow-xs shrink-0 relative z-0">
+                      <div className="-rotate-45 text-center text-[9px] sm:text-xs font-extrabold text-amber-950 p-1.5 leading-tight max-w-[85px] sm:max-w-[100px] break-words">
+                        {labelContent}
                       </div>
-                      <i className="fa-solid fa-arrow-down text-emerald-600 text-base shrink-0" />
                     </div>
                   </div>
 
-                  {/* Panah Tegak Lurus Menempel ke Proses Bawah */}
-                  <div className="flex flex-col items-center justify-center text-emerald-600 -mt-1">
+                  {/* SISI BAWAH: CABANG YA / LULUS */}
+                  <div className="flex flex-col items-center justify-center text-emerald-600 -mt-2 sm:-mt-3 z-10">
+                    <div className="flex items-center gap-1 bg-emerald-50 border border-emerald-400 rounded-full px-3 py-0.5 text-emerald-950 text-[9px] sm:text-xs font-bold shadow-xs">
+                      <span className="text-emerald-800 font-extrabold uppercase">YA / Lulus</span>
+                      <i className="fa-solid fa-arrow-down text-emerald-600 text-xs" />
+                    </div>
                     <div className="w-0.5 h-3 bg-emerald-600" />
                     <i className="fa-solid fa-caret-down text-sm -mt-1 text-emerald-600" />
                   </div>
