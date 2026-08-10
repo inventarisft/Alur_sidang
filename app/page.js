@@ -322,11 +322,43 @@ function PrintParafSection({ cards }) {
   );
 }
 
+// ===== SKELETON LOADING COMPONENTS =====
+function TimelineSkeleton() {
+  return (
+    <div className="space-y-4 max-w-3xl mx-auto">
+      {[1, 2, 3].map(i => (
+        <div key={i} className="w-full bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-3 animate-pulse">
+          <div className="flex items-center justify-between">
+            <div className="h-5 bg-slate-200 rounded-lg w-1/3" />
+            <div className="h-5 bg-slate-100 rounded-full w-20" />
+          </div>
+          <div className="h-3.5 bg-slate-100 rounded-md w-full" />
+          <div className="h-3.5 bg-slate-100 rounded-md w-3/4" />
+          <div className="h-11 bg-slate-50 border border-slate-100 rounded-xl w-full" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FlowchartSkeleton() {
+  return (
+    <div className="flex flex-col items-center gap-4 py-6 w-full max-w-md mx-auto animate-pulse">
+      <div className="h-10 bg-slate-200 rounded-full w-48" />
+      <div className="w-1 h-6 bg-slate-200 rounded-full" />
+      <div className="h-14 bg-white border border-slate-200 rounded-xl w-full" />
+      <div className="w-1 h-6 bg-slate-200 rounded-full" />
+      <div className="w-28 h-28 bg-amber-50/50 border border-amber-200 rotate-45 rounded-xl my-2" />
+    </div>
+  );
+}
+
 // ===== MAIN PUBLIC PAGE =====
 export default function HomePage() {
   const [cards, setCards] = useState([]);
   const [prodiList, setProdiList] = useState([]);
   const [activeProdi, setActiveProdi] = useState('te');
+  const [loading, setLoading] = useState(true);
   const [openSections, setOpenSections] = useState({
     timeline: true,   // Default Terbuka
     flowchart: true,  // Default Terbuka
@@ -339,12 +371,18 @@ export default function HomePage() {
 
   useEffect(() => {
     async function load() {
-      const [pr, cr] = await Promise.all([fetch(`${API}?type=prodi`), fetch(API)]);
-      const prodiData = pr.ok ? await pr.json() : [];
-      const cardData = cr.ok ? await cr.json() : [];
-      setProdiList(prodiData);
-      setCards(cardData);
-      if (prodiData.length > 0) setActiveProdi(prodiData[0].code);
+      try {
+        const [pr, cr] = await Promise.all([fetch(`${API}?type=prodi`), fetch(API)]);
+        const prodiData = pr.ok ? await pr.json() : [];
+        const cardData = cr.ok ? await cr.json() : [];
+        setProdiList(prodiData);
+        setCards(cardData);
+        if (prodiData.length > 0) setActiveProdi(prodiData[0].code);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
     }
     load();
 
@@ -449,7 +487,7 @@ export default function HomePage() {
 
           {openSections.timeline && (
             <div className="mt-6 pt-5 border-t border-slate-100">
-              <TimelineCards cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
+              {loading ? <TimelineSkeleton /> : <TimelineCards cards={cards} prodiList={prodiList} activeProdi={activeProdi} />}
             </div>
           )}
         </div>
@@ -481,7 +519,7 @@ export default function HomePage() {
 
           {(openSections.flowchart || typeof window === 'undefined') && (
             <div className="mt-4 pt-4 sm:pt-5 border-t border-slate-100 no-print-border-t">
-              <AnsiFlowchart cards={cards} prodiList={prodiList} activeProdi={activeProdi} />
+              {loading ? <FlowchartSkeleton /> : <AnsiFlowchart cards={cards} prodiList={prodiList} activeProdi={activeProdi} />}
             </div>
           )}
         </div>
