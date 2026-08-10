@@ -23,7 +23,7 @@ function getCleanNote(note, activeProdi) {
   return note;
 }
 
-// ===== PURE NATIVE JSPDF GENERATOR (100% RESPONSIVE TEXT WRAPPING & NO CONTAINER SPILLOVER) =====
+// ===== PURE NATIVE JSPDF GENERATOR (ZERO REDUNDANT NUMBERING & COMPLETE FULL UNTRUNCATED TEXT) =====
 export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLoading }) {
   if (!cards || cards.length === 0 || !prodiList || prodiList.length === 0) {
     alert('Data belum selesai dimuat. Silakan tunggu beberapa detik dan coba lagi.');
@@ -125,7 +125,7 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
       let docsHeight = 0;
       if (docsList.length > 0) {
         const rows = Math.ceil(docsList.length / 2);
-        docsHeight = 6 + (rows * 3.5);
+        docsHeight = 6 + (rows * 3.6);
       }
 
       const totalCardHeight = 6 + descHeight + noteHeight + docsHeight + 2;
@@ -175,7 +175,7 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
 
       if (docsList.length > 0) {
         const rows = Math.ceil(docsList.length / 2);
-        const docsBoxHeight = 4.5 + (rows * 3.5);
+        const docsBoxHeight = 4.5 + (rows * 3.6);
 
         pdf.setFillColor(248, 250, 252);
         pdf.setDrawColor(203, 213, 225);
@@ -187,18 +187,28 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
         pdf.text('Berkas Persyaratan (PDF MENTORA - kpta.sisfoftudinus.my.id):', 17, contentY + 3.5);
 
         pdf.setFont('helvetica', 'normal');
-        pdf.setFontSize(6.3);
+        pdf.setFontSize(5.8);
         pdf.setTextColor(30, 41, 59);
 
         docsList.forEach((doc, di) => {
           const col = di % 2;
           const row = Math.floor(di / 2);
-          const posX = col === 0 ? 17 : 106;
-          const posY = contentY + 7 + (row * 3.5);
+          const posX = col === 0 ? 17 : 104;
+          const posY = contentY + 7 + (row * 3.6);
 
-          const rawText = `${di + 1}. ${doc.title}${doc.sub ? ` (${doc.sub})` : ''}`;
-          const truncatedDoc = rawText.length > 42 ? rawText.substring(0, 40) + '...' : rawText;
-          pdf.text(truncatedDoc, posX, posY);
+          // Clean title: remove redundant leading "1. " if doc.title already starts with a number
+          let titleText = (doc.title || '').trim();
+          if (!/^\d+\.\s*/.test(titleText)) {
+            titleText = `${di + 1}. ${titleText}`;
+          }
+
+          if (doc.sub) {
+            titleText += ` (${doc.sub})`;
+          }
+
+          // Full text display up to 64 chars without premature "..." truncation
+          const displayStr = titleText.length > 64 ? titleText.substring(0, 62) + '..' : titleText;
+          pdf.text(displayStr, posX, posY);
         });
       }
 
@@ -250,7 +260,7 @@ export async function triggerPdfExport({ cards, prodiList, activeProdi, setPdfLo
     pdf.setTextColor(56, 189, 248);
     pdf.text('(Syarat Berkas (CD))', centerX, 48.7, { align: 'center' });
 
-    // Note 1 Info Box (Soft Blue like Web - Auto Wrapped to 105mm Container Width)
+    // Note 1 Info Box (Soft Blue like Web - Auto Wrapped to 106mm Container Width)
     const note1Str = 'i  Pengisian SKPI (sisfoftudinus.my.id) & Link n Match (alumni.sisfoftudinus.my.id) dapat dicicil sejak Smt 1';
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(5.8);
